@@ -1,0 +1,19 @@
+rules "A conflict arises because we cannot predict if the lights will be on or off when the first rules fires two events."
+  rule "Unlock the door and turn on TV when a person enters the house."
+    person [. ~> home];
+    true;
+    door := unlocked, tv := on
+  end
+
+  rule "Turn on the light when the door unlocks."
+    door [. ~> unlocked];
+    true
+    lights := on
+  end
+
+  rule "Turn off the light when the TV is turned on."
+    tv [. ~> on];
+    true
+    lights := off
+  end
+end

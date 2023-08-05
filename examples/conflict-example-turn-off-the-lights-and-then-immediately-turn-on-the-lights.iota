@@ -1,0 +1,13 @@
+rules ""
+  rule "Lock the door and turn off the lights when a person leaves home."
+    person [ home ~> ];
+    true;
+    door := locked, lgihts := off
+  end
+
+  rule "Turn on the lights when the door's status changes."
+    door [ . ~>];
+    true;
+    lights := on
+  end
+end
