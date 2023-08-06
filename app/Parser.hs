@@ -65,11 +65,11 @@ parserSpec = ParserSpec
       
       ruleWithNoAction "AndPred -> EqNeqPred",
       
-      ruleWithNoAction "EqNeqPred -> EqNeqPred == CompPred",
+      ruleWithNoAction "EqNeqPred -> EqNeqPred == CompExpr",
       
-      ruleWithNoAction "EqNeqPred -> EqNeqPred != CompPred",
+      ruleWithNoAction "EqNeqPred -> EqNeqPred != CompExpr",
       
-      ruleWithNoAction "EqneqPred -> CompExpr",
+      ruleWithNoAction "EqNeqPred -> CompExpr",
       
       ruleWithNoAction "CompExpr -> CompExpr < AdditiveExpr",
       
@@ -95,9 +95,9 @@ parserSpec = ParserSpec
       
       ruleWithNoAction "UnaryExpr -> - PrimaryExpr",
       
-      ruleWithNoAction "UnaryExpr -> PrimaryExpr",
-      
       ruleWithNoAction "UnaryExpr -> ~ PrimaryExpr",
+      
+      ruleWithNoAction "UnaryExpr -> PrimaryExpr",
       
       ruleWithNoAction "PrimaryExpr -> true",
       

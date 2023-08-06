@@ -1,10 +1,49 @@
-module Token (Token(..)) where
+module Token (Token(..), keywords) where
 
 import TokenInterface
 
 data Token =
-    IDENTIFIER
-  | END_OF_TOKENS
+    END_OF_TOKENS
+  | STRINGLITERAL
+  | NUMBERLITERAL
+  | RULE
+  | RULES
+  | END
+  | ALL
+  | EXISTS
+  | MAP
+  | TRUE
+  | FALSE
+  | START
+  | STOP
+  | AT
+  | DEVICES
+  | IDENTIFIER
+  | OPENBRACKET
+  | CLOSEBRACKET
+  | OPENBRACE
+  | CLOSEBRACE
+  | OPENPARENTHESIS
+  | CLOSEPARENTHESIS
+  | DOT
+  | COMMA
+  | EQUAL
+  | SEMICOLON
+  | EVENTARROW
+  | GROUPARROW
+  | NOTEQUAL
+  | LESSTHAN
+  | LESSTHANOREQUAL
+  | GREATERTHAN
+  | GREATERTHANOREQUAL
+  | NEG
+  | OR
+  | AND
+  | ADDITION
+  | SUBTRACTION
+  | MULTIPLICATION
+  | DIVISION
+  | ASSIGN
   deriving (Eq, Show)
 
 tokenStrList :: [(Token,String)]
@@ -14,20 +53,6 @@ tokenStrList =
     (STRINGLITERAL, "string_literal"),
     (NUMBERLITERAL, "number_literal"),
   
-    (RULE, "rule"),
-    (RULES, "rules"),
-    (END, "end"),
-    (ALL, "all"),
-    (EXISTS, "exists"),
-    (MAP, "map"),
-    (TRUE, "true"),
-    (FALSE, "false"),
-    (START, "start"),
-    (STOP, "stop"),
-    (AT, "at"),
-    (DEVICES, "devices"),
-    (IDENTIFIER, "identifier"),
-    
     (OPENBRACKET, "["),
     (CLOSEBRACKET, "]"),
     (OPENBRACE, "{"),
@@ -57,6 +82,23 @@ tokenStrList =
     (DIVISION, "/"),
     
     (ASSIGN, ":=")
+  ] ++ keywords
+
+keywords =
+  [
+    (RULE, "rule"),
+    (RULES, "rules"),
+    (END, "end"),
+    (ALL, "all"),
+    (EXISTS, "exists"),
+    (MAP, "map"),
+    (TRUE, "true"),
+    (FALSE, "false"),
+    (START, "start"),
+    (STOP, "stop"),
+    (AT, "at"),
+    (DEVICES, "devices"),
+    (IDENTIFIER, "identifier")
   ]
 
 findTok tok [] = Nothing

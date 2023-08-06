@@ -24,6 +24,7 @@ dependencies:
 - yapb >= 0.2.7
 - regex-tdfa
 - hspec
+- containers
 
 ghc-options:
 - -Wall

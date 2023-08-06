@@ -1,0 +1,57 @@
+0: IotaProg' -> IotaProg
+1: IotaProg -> Rules
+2: IotaProg -> Rule
+3: Rules -> rules string_literal OneOrMoreRules end
+4: OneOrMoreRules -> Rule
+5: OneOrMoreRules -> Rule OneOrMoreRules
+6: Rule -> rule string_literal EventHandler ; Predicate ; Actions end
+7: EventHandler -> FieldOrTimer [ . ~> ]
+8: EventHandler -> FieldOrTimer [ . ~> Constant ]
+9: EventHandler -> FieldOrTimer [ Constant ~> ]
+10: EventHandler -> FieldOrTimer [ Constant ~> Constant ]
+11: EventHandler -> any Group ( identifier -> Predicate )
+12: Predicate -> OrPred
+13: Predicate -> all Group ( x -> Predicate )
+14: Predicate -> exists Group ( x -> Predicate )
+15: OrPred -> OrPred || AndPred
+16: OrPred -> AndPred
+17: AndPred -> AndPred && EqNeqPred
+18: AndPred -> EqNeqPred
+19: EqNeqPred -> EqNeqPred == CompExpr
+20: EqNeqPred -> EqNeqPred != CompExpr
+21: EqNeqPred -> CompExpr
+22: CompExpr -> CompExpr < AdditiveExpr
+23: CompExpr -> CompExpr <= AdditiveExpr
+24: CompExpr -> CompExpr > AdditiveExpr
+25: CompExpr -> CompExpr >= AdditiveExpr
+26: CompExpr -> AdditiveExpr
+27: AdditiveExpr -> AdditiveExpr + MultiplicativeExpr
+28: AdditiveExpr -> AdditiveExpr - MultiplicativeExpr
+29: AdditiveExpr -> MultiplicativeExpr
+30: MultiplicativeExpr -> MultiplicativeExpr * UnaryExpr
+31: MultiplicativeExpr -> MultiplicativeExpr / UnaryExpr
+32: MultiplicativeExpr -> UnaryExpr
+33: UnaryExpr -> - PrimaryExpr
+34: UnaryExpr -> ~ PrimaryExpr
+35: UnaryExpr -> PrimaryExpr
+36: PrimaryExpr -> true
+37: PrimaryExpr -> false
+38: PrimaryExpr -> number_literal
+39: PrimaryExpr -> FieldOrTimer
+40: PrimaryExpr -> ( Predicate )
+41: Constant -> identifier
+42: Constant -> number_literal
+43: Actions -> 
+44: Actions -> Action Actions
+45: Action -> FieldOrTimer := AdditiveExpr
+46: Action -> start Timer at AdditiveExpr
+47: Action -> stop Timer
+48: Action -> map Group ( x -> Action )
+49: FieldOrTimer -> identifier
+50: FieldOrTimer -> identifier . identifier
+51: Group -> devices
+52: Group -> { zero_or_more_device_identifiers }
+53: zero_or_more_device_identifiers -> 
+54: zero_or_more_device_identifiers -> one_or_more_device_identifiers
+55: one_or_more_device_identifiers -> identifier
+56: one_or_more_device_identifiers -> identifier , one_or_more_device_identifiers
