@@ -99,7 +99,7 @@ parserSpec = ParserSpec
       
       ruleWithNoAction "PrimaryExpr -> ( Predicate )",
 
-      ruleWithNoAction "Actions -> Action",
+      ruleWithNoAction "Actions -> ",
       
       ruleWithNoAction "Actions -> Action Actions",
 
