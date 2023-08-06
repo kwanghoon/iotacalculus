@@ -23,6 +23,8 @@ parserSpec = ParserSpec
 
     parserSpecList =
     [
+      -- | The IoTa calculus (base syntax)
+      
       ruleWithNoAction "IotaProg' -> IotaProg",
       
       ruleWithNoAction "IotaProg -> Rules",
@@ -45,17 +47,25 @@ parserSpec = ParserSpec
       
       ruleWithNoAction "EventHandler -> FieldOrTimer [ Constant ~> Constant ]",
       
+      ruleWithNoAction "EventHandler -> any Group ( identifier -> Predicate )",
+      
       ruleWithNoAction "Predicate -> OrPred",
       
-      ruleWithNoAction "OrPred -> OrPred \/ AndPred",
+      ruleWithNoAction "Predicate -> all Group ( x -> Predicate )",
+      
+      ruleWithNoAction "Predicate -> exists Group ( x -> Predicate )",
+      
+      -- ruleWithNoAction "Predicate -> FieldOrTimer is in Group",
+      
+      ruleWithNoAction "OrPred -> OrPred || AndPred",
       
       ruleWithNoAction "OrPred -> AndPred",
       
-      ruleWithNoAction "AndPred -> AndPred /\ EqNeqPred",
+      ruleWithNoAction "AndPred -> AndPred && EqNeqPred",
       
       ruleWithNoAction "AndPred -> EqNeqPred",
       
-      ruleWithNoAction "EqNeqPred -> EqNeqPred = CompPred",
+      ruleWithNoAction "EqNeqPred -> EqNeqPred == CompPred",
       
       ruleWithNoAction "EqNeqPred -> EqNeqPred != CompPred",
       
@@ -93,12 +103,16 @@ parserSpec = ParserSpec
       
       ruleWithNoAction "PrimaryExpr -> false",
       
-      ruleWithNoAction "PrimaryExpr -> Constant",
+      ruleWithNoAction "PrimaryExpr -> number_literal",
       
       ruleWithNoAction "PrimaryExpr -> FieldOrTimer",
       
       ruleWithNoAction "PrimaryExpr -> ( Predicate )",
 
+      ruleWithNoAction "Constant -> identifier",
+      
+      ruleWithNoAction "Constant -> number_literal",
+      
       ruleWithNoAction "Actions -> ",
       
       ruleWithNoAction "Actions -> Action Actions",
@@ -108,6 +122,25 @@ parserSpec = ParserSpec
       ruleWithNoAction "Action -> start Timer at AdditiveExpr",
       
       ruleWithNoAction "Action -> stop Timer",
+
+      ruleWithNoAction "Action -> map Group ( x -> Action )",
+
+      ruleWithNoAction "FieldOrTimer -> identifier",
+
+      ruleWithNoAction "FieldOrTimer -> identifier . identifier",
+
+      ruleWithNoAction "Group -> devices",
+
+      ruleWithNoAction "Group -> { zero_or_more_device_identifiers }",
+
+      ruleWithNoAction "zero_or_more_device_identifiers -> ",
+
+      ruleWithNoAction "zero_or_more_device_identifiers -> one_or_more_device_identifiers",
+
+      ruleWithNoAction "one_or_more_device_identifiers -> identifier",
+
+      ruleWithNoAction "one_or_more_device_identifiers -> identifier , one_or_more_device_identifiers"
+
     ],
     
     baseDir = "./",

@@ -10,7 +10,53 @@ data Token =
 tokenStrList :: [(Token,String)]
 tokenStrList =
   [ (END_OF_TOKENS, "$"),
-    (IDENTIFIER, "identifier")
+  
+    (STRINGLITERAL, "string_literal"),
+    (NUMBERLITERAL, "number_literal"),
+  
+    (RULE, "rule"),
+    (RULES, "rules"),
+    (END, "end"),
+    (ALL, "all"),
+    (EXISTS, "exists"),
+    (MAP, "map"),
+    (TRUE, "true"),
+    (FALSE, "false"),
+    (START, "start"),
+    (STOP, "stop"),
+    (AT, "at"),
+    (DEVICES, "devices"),
+    (IDENTIFIER, "identifier"),
+    
+    (OPENBRACKET, "["),
+    (CLOSEBRACKET, "]"),
+    (OPENBRACE, "{"),
+    (CLOSEBRACE, "}"),
+    (OPENPARENTHESIS, "("),
+    (CLOSEPARENTHESIS, ")"),
+    
+    (DOT, "."),
+    (COMMA, ","),
+    (SEMICOLON, ";"),
+    (EVENTARROW, "~>"),
+    (GROUPARROW, "->"),
+    
+    (OR, "||"),
+    (AND, "&&"),
+    (EQUAL, "=="),
+    (NOTEQUAL, "!="),
+    (LESSTHAN, "<"),
+    (LESSTHANOREQUAL, "<="),
+    (GREATERTHAN, ">"),
+    (GREATERTHANOREQUAL, ">="),
+
+    (NEG, "~"),
+    (ADDITION, "+"),
+    (SUBTRACTION, "-"),
+    (MULTIPLICATION, "*"),
+    (DIVISION, "/"),
+    
+    (ASSIGN, ":=")
   ]
 
 findTok tok [] = Nothing
