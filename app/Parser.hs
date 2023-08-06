@@ -47,13 +47,13 @@ parserSpec = ParserSpec
       
       ruleWithNoAction "EventHandler -> FieldOrTimer [ Constant ~> Constant ]",
       
-      ruleWithNoAction "EventHandler -> any Group ( identifier -> Predicate )",
+      ruleWithNoAction "EventHandler -> any Group ( identifier -> EventHandler )",
       
       ruleWithNoAction "Predicate -> OrPred",
       
-      ruleWithNoAction "Predicate -> all Group ( x -> Predicate )",
+      ruleWithNoAction "Predicate -> all Group ( identifier -> Predicate )",
       
-      ruleWithNoAction "Predicate -> exists Group ( x -> Predicate )",
+      ruleWithNoAction "Predicate -> exists Group ( identifier -> Predicate )",
       
       -- ruleWithNoAction "Predicate -> FieldOrTimer is in Group",
       
@@ -115,21 +115,25 @@ parserSpec = ParserSpec
       
       ruleWithNoAction "Actions -> ",
       
-      ruleWithNoAction "Actions -> Action Actions",
+      ruleWithNoAction "Actions -> OneOrMoreActions",
+      
+      ruleWithNoAction "OneOrMoreActions -> Action",
+
+      ruleWithNoAction "OneOrMoreActions -> Action , OneOrMoreActions",
 
       ruleWithNoAction "Action -> FieldOrTimer := AdditiveExpr",
       
-      ruleWithNoAction "Action -> start Timer at AdditiveExpr",
+      ruleWithNoAction "Action -> start identifier at AdditiveExpr",
       
-      ruleWithNoAction "Action -> stop Timer",
+      ruleWithNoAction "Action -> stop identifier",
 
-      ruleWithNoAction "Action -> map Group ( x -> Action )",
+      ruleWithNoAction "Action -> map Group ( identifier -> Action )",
 
       ruleWithNoAction "FieldOrTimer -> identifier",
 
       ruleWithNoAction "FieldOrTimer -> identifier . identifier",
 
-      ruleWithNoAction "Group -> devices",
+      ruleWithNoAction "Group -> identifier",
 
       ruleWithNoAction "Group -> { zero_or_more_device_identifiers }",
 

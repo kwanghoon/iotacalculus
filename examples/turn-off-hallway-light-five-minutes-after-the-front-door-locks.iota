@@ -3,7 +3,7 @@ rules "Turn off the hallway light five minutes after the door locks"
   rule "start a timer when the door locks."
 
     front_door.lock [ unlocked ~> ] ;    // event handler
-    front_door.lock = locked ;        // condition
+    front_door.lock == locked ;        // condition
     start light_timer at 0              // action
 
   end
@@ -11,7 +11,7 @@ rules "Turn off the hallway light five minutes after the door locks"
   rule "turn off the the hallway light and stop the timer when the timer reaches five minutes."
 
     light_timer[. ~> ];           // event handler
-    light_timer = 5;              // condition
+    light_timer == 5;              // condition
     hallway_light.switch := off,  // actions
     stop light_timer
 

@@ -1,13 +1,13 @@
 rules "Christmas lamps on"
   rule "Turn the living room and floor sockets on at 4pm if Christmas mode is enabled."
     clock.hour [ . ~> 16 ];
-    state.auto_christmas = on && exists livingroom, floor (x -> x.socket = off) ;
-    map livingroom, floor (x -> x.socket := on)
+    state.auto_christmas == on && ( exists { livingroom , floor } (x -> x.socket == off) ) ;
+    map { livingroom, floor } (x -> x.socket := on)
   end
 
   rule "When the household wakes up, if it is before 10am and Christmas mode is enabled, turn the living room and floor sockets on."
     state.sleeping[. ~> off] ;
-    state.auto_christmas = on && clock.hour < 10 && exists livingroom, floor (x -> x.socket = off) ;
-    map livingroom, floor (x -> x.socket := on)
+    state.auto_christmas == on && clock.hour < 10 && ( exists { livingroom , floor } (x -> x.socket == off) ) ;
+    map { livingroom, floor } (x -> x.socket := on)
   end
 end

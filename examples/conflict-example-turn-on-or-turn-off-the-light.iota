@@ -7,13 +7,13 @@ rules "A conflict arises because we cannot predict if the lights will be on or o
 
   rule "Turn on the light when the door unlocks."
     door [. ~> unlocked];
-    true
+    true ;
     lights := on
   end
 
   rule "Turn off the light when the TV is turned on."
     tv [. ~> on];
-    true
+    true ;
     lights := off
   end
 end

@@ -9,6 +9,7 @@ data Token =
   | RULE
   | RULES
   | END
+  | ANY
   | ALL
   | EXISTS
   | MAP
@@ -17,7 +18,6 @@ data Token =
   | START
   | STOP
   | AT
-  | DEVICES
   | IDENTIFIER
   | OPENBRACKET
   | CLOSEBRACKET
@@ -89,6 +89,7 @@ keywords =
     (RULE, "rule"),
     (RULES, "rules"),
     (END, "end"),
+    (ANY, "any"),
     (ALL, "all"),
     (EXISTS, "exists"),
     (MAP, "map"),
@@ -97,7 +98,6 @@ keywords =
     (START, "start"),
     (STOP, "stop"),
     (AT, "at"),
-    (DEVICES, "devices"),
     (IDENTIFIER, "identifier")
   ]
 

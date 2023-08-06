@@ -9,10 +9,10 @@
 8: EventHandler -> FieldOrTimer [ . ~> Constant ]
 9: EventHandler -> FieldOrTimer [ Constant ~> ]
 10: EventHandler -> FieldOrTimer [ Constant ~> Constant ]
-11: EventHandler -> any Group ( identifier -> Predicate )
+11: EventHandler -> any Group ( identifier -> EventHandler )
 12: Predicate -> OrPred
-13: Predicate -> all Group ( x -> Predicate )
-14: Predicate -> exists Group ( x -> Predicate )
+13: Predicate -> all Group ( identifier -> Predicate )
+14: Predicate -> exists Group ( identifier -> Predicate )
 15: OrPred -> OrPred || AndPred
 16: OrPred -> AndPred
 17: AndPred -> AndPred && EqNeqPred
@@ -42,16 +42,18 @@
 41: Constant -> identifier
 42: Constant -> number_literal
 43: Actions -> 
-44: Actions -> Action Actions
-45: Action -> FieldOrTimer := AdditiveExpr
-46: Action -> start Timer at AdditiveExpr
-47: Action -> stop Timer
-48: Action -> map Group ( x -> Action )
-49: FieldOrTimer -> identifier
-50: FieldOrTimer -> identifier . identifier
-51: Group -> devices
-52: Group -> { zero_or_more_device_identifiers }
-53: zero_or_more_device_identifiers -> 
-54: zero_or_more_device_identifiers -> one_or_more_device_identifiers
-55: one_or_more_device_identifiers -> identifier
-56: one_or_more_device_identifiers -> identifier , one_or_more_device_identifiers
+44: Actions -> OneOrMoreActions
+45: OneOrMoreActions -> Action
+46: OneOrMoreActions -> Action , OneOrMoreActions
+47: Action -> FieldOrTimer := AdditiveExpr
+48: Action -> start identifier at AdditiveExpr
+49: Action -> stop identifier
+50: Action -> map Group ( identifier -> Action )
+51: FieldOrTimer -> identifier
+52: FieldOrTimer -> identifier . identifier
+53: Group -> identifier
+54: Group -> { zero_or_more_device_identifiers }
+55: zero_or_more_device_identifiers -> 
+56: zero_or_more_device_identifiers -> one_or_more_device_identifiers
+57: one_or_more_device_identifiers -> identifier
+58: one_or_more_device_identifiers -> identifier , one_or_more_device_identifiers
