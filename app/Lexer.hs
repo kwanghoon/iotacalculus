@@ -61,9 +61,11 @@ lexerSpec = LexerSpec
       ]
   }
 
+keywordMap :: Map.Map String Token
 keywordMap = Map.fromList (map swap keywords)
   where swap (a,b) = (b,a)
 
+keywordOrIdentifier :: Monad m => String -> m (Maybe Token)
 keywordOrIdentifier text = 
   case Map.lookup text keywordMap of
     Nothing -> return $ Just IDENTIFIER

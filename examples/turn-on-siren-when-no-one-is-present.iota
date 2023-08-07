@@ -1,14 +1,27 @@
 rule "turn on siren when no one is present at home"
-    device front_door : switch ;
-    input dimmerLevel : number ;
+    device front_door : lock ;
+    device whoisathome : presenceSensor ;
+    device hallway_light : switch;
+    device hallway_player : mediaPlayback;
+    device hallway_alarm : alarm;
+
+    input phone_number : phone ;  // phone number
+
+    input message : string ;  // message string
+
+    output pushMessage : string ; // send the specified message
+
+    output pushMessage : ( string , string ) ; // just send the specified number the specified message
 
     front_door.lock [ locked ~> unlocked] ;    // event handler
 
-        presenceSensor == present ;        // condition 1
-        hallway_light_switch := on,          // actions
-        hallway_player := play 
+        whoisathome.presence == present ;        // condition 1
+        hallway_light.switch := on,              // actions
+        hallway_player := play
 
-    |   presenceSensor != present ;         // condition 2
+    |   whoisathome.presence != present ;         // condition 2
         hallway_alarm := siren,
-        pushMessage := "An unexpected guest!" 
+        pushMessage := "An unexpected guest!" ,
+        pushMessage := ( "010-1234-5678", "An unexpected guest!" ) ,
+        pushMessage := ( phone_number, message ) 
 end

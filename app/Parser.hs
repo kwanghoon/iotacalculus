@@ -37,15 +37,23 @@ parserSpec = ParserSpec
       
       ruleWithNoAction "OneOrMoreRules -> Rule OneOrMoreRules",
 
-      ruleWithNoAction "Rule -> rule string_literal ZeroOrMoreDeviceOrInput EventHandler ; OneOrMorePredicateActions end",
+      ruleWithNoAction "Rule -> rule string_literal ZeroOrMoreDecl EventHandler ; OneOrMorePredicateActions end",
 
-      ruleWithNoAction "ZeroOrMoreDeviceOrInput -> ",
+      ruleWithNoAction "ZeroOrMoreDecl -> ",
 
-      ruleWithNoAction "ZeroOrMoreDeviceOrInput -> DeviceOrInput ZeroOrMoreDeviceOrInput",
+      ruleWithNoAction "ZeroOrMoreDecl -> Decl ZeroOrMoreDecl",
 
-      ruleWithNoAction "DeviceOrInput -> device identifier : identifier ;",  -- device name : capability
+      ruleWithNoAction "Decl -> device identifier : identifier ;",  -- device name : capability
 
-      ruleWithNoAction "DeviceOrInput -> input identifier : identifier ;",  -- input name : value type
+      ruleWithNoAction "Decl -> input identifier : identifier ;",  -- input name : value type
+
+      ruleWithNoAction "Decl -> output identifier : identifier ;",  -- input name : value type
+
+      ruleWithNoAction "Decl -> output identifier : ( OneOrMoreIdentifiers ) ;",  -- output name : value types
+
+      ruleWithNoAction "OneOrMoreIdentifiers -> identifier",
+
+      ruleWithNoAction "OneOrMoreIdentifiers -> identifier , OneOrMoreIdentifiers",
 
       ruleWithNoAction "EventHandler -> FieldOrTimer [ . ~> ]",
       
@@ -136,12 +144,18 @@ parserSpec = ParserSpec
       ruleWithNoAction "OneOrMoreActions -> Action , OneOrMoreActions",
 
       ruleWithNoAction "Action -> FieldOrTimer := AdditiveExpr",
+
+      ruleWithNoAction "Action -> FieldOrTimer := ( OneOrMoreAdditiveExprs )",
       
       ruleWithNoAction "Action -> start identifier at AdditiveExpr",
       
       ruleWithNoAction "Action -> stop identifier",
 
       ruleWithNoAction "Action -> map Group ( identifier -> Action )",
+
+      ruleWithNoAction "OneOrMoreAdditiveExprs -> AdditiveExpr",
+
+      ruleWithNoAction "OneOrMoreAdditiveExprs -> AdditiveExpr , OneOrMoreAdditiveExprs",
 
       ruleWithNoAction "FieldOrTimer -> identifier",
 
