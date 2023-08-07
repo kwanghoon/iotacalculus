@@ -45,6 +45,8 @@ lexerSpec = LexerSpec
         (">", mkFn GREATERTHAN),
         (">=", mkFn GREATERTHANOREQUAL),
 
+        ("\\|", mkFn BAR),
+
         ("~", mkFn NEG),
         ("\\+", mkFn ADDITION),
         ("\\-", mkFn SUBTRACTION),
@@ -52,6 +54,8 @@ lexerSpec = LexerSpec
         ("\\/", mkFn DIVISION),
 
         (":=", mkFn ASSIGN),
+
+        ("\\:", mkFn COLON),
 
         ("[\\_a-zA-Z][\\_a-zA-Z0-9]*"    , keywordOrIdentifier)
       ]

@@ -37,7 +37,15 @@ parserSpec = ParserSpec
       
       ruleWithNoAction "OneOrMoreRules -> Rule OneOrMoreRules",
 
-      ruleWithNoAction "Rule -> rule string_literal EventHandler ; Predicate ; Actions end",
+      ruleWithNoAction "Rule -> rule string_literal ZeroOrMoreDeviceOrInput EventHandler ; OneOrMorePredicateActions end",
+
+      ruleWithNoAction "ZeroOrMoreDeviceOrInput -> ",
+
+      ruleWithNoAction "ZeroOrMoreDeviceOrInput -> DeviceOrInput ZeroOrMoreDeviceOrInput",
+
+      ruleWithNoAction "DeviceOrInput -> device identifier : identifier ;",  -- device name : capability
+
+      ruleWithNoAction "DeviceOrInput -> input identifier : identifier ;",  -- input name : value type
 
       ruleWithNoAction "EventHandler -> FieldOrTimer [ . ~> ]",
       
@@ -48,6 +56,10 @@ parserSpec = ParserSpec
       ruleWithNoAction "EventHandler -> FieldOrTimer [ Constant ~> Constant ]",
       
       ruleWithNoAction "EventHandler -> any Group ( identifier -> EventHandler )",
+
+      ruleWithNoAction "OneOrMorePredicateActions -> Predicate ; Actions",      -- Extension
+
+      ruleWithNoAction "OneOrMorePredicateActions -> Predicate ; Actions | OneOrMorePredicateActions",
       
       ruleWithNoAction "Predicate -> OrPred",
       
@@ -104,6 +116,8 @@ parserSpec = ParserSpec
       ruleWithNoAction "PrimaryExpr -> false",
       
       ruleWithNoAction "PrimaryExpr -> number_literal",
+
+      ruleWithNoAction "PrimaryExpr -> string_literal",       -- extension
       
       ruleWithNoAction "PrimaryExpr -> FieldOrTimer",
       

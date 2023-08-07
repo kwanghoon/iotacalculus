@@ -29,8 +29,10 @@ data Token =
   | COMMA
   | EQUAL
   | SEMICOLON
+  | COLON
   | EVENTARROW
   | GROUPARROW
+  | BAR
   | NOTEQUAL
   | LESSTHAN
   | LESSTHANOREQUAL
@@ -44,6 +46,8 @@ data Token =
   | MULTIPLICATION
   | DIVISION
   | ASSIGN
+  | DEVICE
+  | INPUT
   deriving (Eq, Show)
 
 tokenStrList :: [(Token,String)]
@@ -63,9 +67,11 @@ tokenStrList =
     (DOT, "."),
     (COMMA, ","),
     (SEMICOLON, ";"),
+    (COLON, ":"),
     (EVENTARROW, "~>"),
     (GROUPARROW, "->"),
-    
+    (BAR, "|"),
+
     (OR, "||"),
     (AND, "&&"),
     (EQUAL, "=="),
@@ -84,6 +90,7 @@ tokenStrList =
     (ASSIGN, ":=")
   ] ++ keywords
 
+keywords :: [(Token, String)]
 keywords =
   [
     (RULE, "rule"),
@@ -98,10 +105,13 @@ keywords =
     (START, "start"),
     (STOP, "stop"),
     (AT, "at"),
-    (IDENTIFIER, "identifier")
+    (IDENTIFIER, "identifier"),
+    (DEVICE, "device"),
+    (INPUT, "input")
   ]
 
-findTok tok [] = Nothing
+findTok :: Token -> [(Token, String)] -> Maybe String
+findTok _ [] = Nothing
 findTok tok ((tok_,str):list)
   | tok == tok_ = Just str
   | otherwise   = findTok tok list
