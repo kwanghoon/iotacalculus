@@ -31,7 +31,7 @@ parserSpec = ParserSpec
       
       ruleWithNoAction "IotaProg -> Rule",
       
-      ruleWithNoAction "Rules -> rules string_literal OneOrMoreRules end",
+      ruleWithNoAction "Rules -> rules string_literal ZeroOrMoreDeviceOrInput OneOrMoreRules end",
 
       ruleWithNoAction "OneOrMoreRules -> Rule",
       
