@@ -1,0 +1,14 @@
+rule "turn on siren when no one is present at home"
+    device front_door : switch ;
+    input dimmerLevel : number ;
+
+    front_door.lock [ locked ~> unlocked] ;    // event handler
+
+        presenceSensor == present ;        // condition 1
+        hallway_light_switch := on,          // actions
+        hallway_player := play 
+
+    |   presenceSensor != present ;         // condition 2
+        hallway_alarm := siren,
+        pushMessage := "An unexpected guest!" 
+end
