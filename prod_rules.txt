@@ -1,12 +1,12 @@
 0: IotaProg' -> IotaProg
 1: IotaProg -> Rules
 2: IotaProg -> Rule
-3: Rules -> rules string_literal ZeroOrMoreDeviceOrInput OneOrMoreRules end
+3: Rules -> rules string_literal ZeroOrMoreDecls OneOrMoreRules end
 4: OneOrMoreRules -> Rule
 5: OneOrMoreRules -> Rule OneOrMoreRules
-6: Rule -> rule string_literal ZeroOrMoreDecl EventHandler ; OneOrMorePredicateActions end
-7: ZeroOrMoreDecl -> 
-8: ZeroOrMoreDecl -> Decl ZeroOrMoreDecl
+6: Rule -> rule string_literal ZeroOrMoreDecls EventHandler ; OneOrMorePredicateActions end
+7: ZeroOrMoreDecls -> 
+8: ZeroOrMoreDecls -> Decl ZeroOrMoreDecls
 9: Decl -> device identifier : identifier ;
 10: Decl -> input identifier : identifier ;
 11: Decl -> output identifier : identifier ;

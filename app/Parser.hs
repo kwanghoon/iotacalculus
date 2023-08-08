@@ -31,17 +31,17 @@ parserSpec = ParserSpec
       
       ruleWithNoAction "IotaProg -> Rule",
       
-      ruleWithNoAction "Rules -> rules string_literal ZeroOrMoreDeviceOrInput OneOrMoreRules end",
+      ruleWithNoAction "Rules -> rules string_literal ZeroOrMoreDecls OneOrMoreRules end",
 
       ruleWithNoAction "OneOrMoreRules -> Rule",
       
       ruleWithNoAction "OneOrMoreRules -> Rule OneOrMoreRules",
 
-      ruleWithNoAction "Rule -> rule string_literal ZeroOrMoreDecl EventHandler ; OneOrMorePredicateActions end",
+      ruleWithNoAction "Rule -> rule string_literal ZeroOrMoreDecls EventHandler ; OneOrMorePredicateActions end",
 
-      ruleWithNoAction "ZeroOrMoreDecl -> ",
+      ruleWithNoAction "ZeroOrMoreDecls -> ",
 
-      ruleWithNoAction "ZeroOrMoreDecl -> Decl ZeroOrMoreDecl",
+      ruleWithNoAction "ZeroOrMoreDecls -> Decl ZeroOrMoreDecls",
 
       ruleWithNoAction "Decl -> device identifier : identifier ;",  -- device name : capability
 
