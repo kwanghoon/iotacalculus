@@ -1,13 +1,17 @@
-rules ""
+rules "Conflict example"
+  device person : presenceSensor ;
+  device light : switch ;
+  device door : lock ;
+  
   rule "Lock the door and turn off the lights when a person leaves home."
-    person [ home ~> ];
+    person.presence [ home ~> ];
     true;
-    door := locked, lgihts := off
+    door.lock := locked, lgiht.switch := off
   end
 
   rule "Turn on the lights when the door's status changes."
-    door [ . ~>];
+    door.lock [ . ~>];
     true;
-    lights := on
+    light.switch := on
   end
 end

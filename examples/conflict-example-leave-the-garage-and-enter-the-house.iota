@@ -1,14 +1,17 @@
 rules "A conflict would result if a person were to leave the garage and enter the house."
+  device person : presenceSensor ;
+  device light : switch ;
+  
   rule "turn on the light when a person enters the house."
-    person [ . ~> home ];
+    person.presence [ . ~> home ];
     true;
-    lights := on
+    light.switch := on
   end
   
   rule "turn off the light when a person leaves the garage."
-    person [ home ~> ];
+    person.presence [ home ~> ];
     true;
-    lights := off
+    light.switch := off
   end
 end
 

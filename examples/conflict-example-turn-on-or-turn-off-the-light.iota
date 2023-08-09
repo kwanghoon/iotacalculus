@@ -1,19 +1,24 @@
 rules "A conflict arises because we cannot predict if the lights will be on or off when the first rules fires two events."
+  device person : presenceSensor ;
+  device light : switch ;
+  device tv : switch ;
+  device door : lock ;
+  
   rule "Unlock the door and turn on TV when a person enters the house."
-    person [. ~> home];
+    person.presence [. ~> home];
     true;
-    door := unlocked, tv := on
+    door.lock := unlocked, tv.switch := on
   end
 
   rule "Turn on the light when the door unlocks."
-    door [. ~> unlocked];
+    door.lock [. ~> unlocked];
     true ;
-    lights := on
+    light.switch := on
   end
 
   rule "Turn off the light when the TV is turned on."
-    tv [. ~> on];
+    tv.switch [. ~> on];
     true ;
-    lights := off
+    light.switch := off
   end
 end

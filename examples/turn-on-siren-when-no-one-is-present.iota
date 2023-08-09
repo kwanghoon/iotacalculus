@@ -11,7 +11,7 @@ rule "turn on siren when no one is present at home"
 
     output pushMessage : string ; // send the specified message
 
-    output pushMessage : ( string , string ) ; // just send the specified number the specified message
+    // output pushMessage : ( string , string ) ; // just send the specified number the specified message
 
     front_door.lock [ locked ~> unlocked] ;    // event handler
 
@@ -21,7 +21,7 @@ rule "turn on siren when no one is present at home"
 
     |   whoisathome.presence != present ;         // condition 2
         hallway_alarm := siren,
-        pushMessage := "An unexpected guest!" ,
-        pushMessage := ( "010-1234-5678", "An unexpected guest!" ) ,
-        pushMessage := ( phone_number, message ) 
+        pushMessage := "An unexpected guest!" // ,
+        // pushMessage := ( "010-1234-5678", "An unexpected guest!" ) ,
+        // pushMessage := ( phone_number, message ) 
 end

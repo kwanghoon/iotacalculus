@@ -1,13 +1,20 @@
 rules "Christmas lamps on"
+  device livingroom : socket ; // not a standard capability
+  device floor : socket ; // not a standard capability
+
+  input clock : time ; 
+  input state_auto_christmas : boolean ;
+  input state_sleeping : switch ;
+  
   rule "Turn the living room and floor sockets on at 4pm if Christmas mode is enabled."
     clock.hour [ . ~> 16 ];
-    state.auto_christmas == on && ( exists { livingroom , floor } (x -> x.socket == off) ) ;
+    state_auto_christmas == true && ( exists { livingroom , floor } (x -> x.socket == off) ) ;
     map { livingroom, floor } (x -> x.socket := on)
   end
 
   rule "When the household wakes up, if it is before 10am and Christmas mode is enabled, turn the living room and floor sockets on."
-    state.sleeping[. ~> off] ;
-    state.auto_christmas == on && clock.hour < 10 && ( exists { livingroom , floor } (x -> x.socket == off) ) ;
+    state_sleeping[. ~> off ] ; 
+    state_auto_christmas == true && clock.hour < 10 && ( exists { livingroom , floor } (x -> x.socket == off) ) ;
     map { livingroom, floor } (x -> x.socket := on)
   end
 end
