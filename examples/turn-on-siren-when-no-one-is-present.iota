@@ -21,7 +21,7 @@ rule "turn on siren when no one is present at home"
 
     |   whoisathome.presence != present ;         // condition 2
         hallway_alarm := siren,
-        pushMessage := "An unexpected guest!" // ,
-        // pushMessage := ( "010-1234-5678", "An unexpected guest!" ) ,
-        // pushMessage := ( phone_number, message ) 
+        pushMessage ( "An unexpected guest!" ) // ,
+        // pushMessage ( "010-1234-5678", "An unexpected guest!" ) ,
+        // pushMessage ( phone_number, message ) 
 end

@@ -3,71 +3,73 @@
 2: IotaProg -> Rule
 3: Rules -> rules string_literal ZeroOrMoreDecls OneOrMoreRules end
 4: OneOrMoreRules -> Rule
-5: OneOrMoreRules -> Rule OneOrMoreRules
-6: Rule -> rule string_literal ZeroOrMoreDecls EventHandler ; OneOrMorePredicateActions end
-7: ZeroOrMoreDecls -> 
-8: ZeroOrMoreDecls -> Decl ZeroOrMoreDecls
-9: Decl -> device identifier : identifier ;
-10: Decl -> input identifier : identifier ;
-11: Decl -> output identifier : identifier ;
-12: Decl -> output identifier : ( OneOrMoreIdentifiers ) ;
-13: OneOrMoreIdentifiers -> identifier
-14: OneOrMoreIdentifiers -> identifier , OneOrMoreIdentifiers
-15: EventHandler -> FieldOrTimer [ . ~> ]
-16: EventHandler -> FieldOrTimer [ . ~> Constant ]
-17: EventHandler -> FieldOrTimer [ Constant ~> ]
-18: EventHandler -> FieldOrTimer [ Constant ~> Constant ]
-19: EventHandler -> any Group ( identifier -> EventHandler )
-20: OneOrMorePredicateActions -> Predicate ; Actions
-21: OneOrMorePredicateActions -> Predicate ; Actions | OneOrMorePredicateActions
-22: Predicate -> OrPred
-23: Predicate -> all Group ( identifier -> Predicate )
-24: Predicate -> exists Group ( identifier -> Predicate )
-25: OrPred -> OrPred || AndPred
-26: OrPred -> AndPred
-27: AndPred -> AndPred && EqNeqPred
-28: AndPred -> EqNeqPred
-29: EqNeqPred -> EqNeqPred == CompExpr
-30: EqNeqPred -> EqNeqPred != CompExpr
-31: EqNeqPred -> CompExpr
-32: CompExpr -> CompExpr < AdditiveExpr
-33: CompExpr -> CompExpr <= AdditiveExpr
-34: CompExpr -> CompExpr > AdditiveExpr
-35: CompExpr -> CompExpr >= AdditiveExpr
-36: CompExpr -> AdditiveExpr
-37: AdditiveExpr -> AdditiveExpr + MultiplicativeExpr
-38: AdditiveExpr -> AdditiveExpr - MultiplicativeExpr
-39: AdditiveExpr -> MultiplicativeExpr
-40: MultiplicativeExpr -> MultiplicativeExpr * UnaryExpr
-41: MultiplicativeExpr -> MultiplicativeExpr / UnaryExpr
-42: MultiplicativeExpr -> UnaryExpr
-43: UnaryExpr -> - PrimaryExpr
-44: UnaryExpr -> ~ PrimaryExpr
-45: UnaryExpr -> PrimaryExpr
-46: PrimaryExpr -> true
-47: PrimaryExpr -> false
-48: PrimaryExpr -> number_literal
-49: PrimaryExpr -> string_literal
-50: PrimaryExpr -> FieldOrTimer
-51: PrimaryExpr -> ( Predicate )
-52: Constant -> identifier
-53: Constant -> number_literal
-54: Actions -> 
-55: Actions -> OneOrMoreActions
-56: OneOrMoreActions -> Action
-57: OneOrMoreActions -> Action , OneOrMoreActions
-58: Action -> FieldOrTimer := AdditiveExpr
-59: Action -> FieldOrTimer := ( OneOrMoreAdditiveExprs )
-60: Action -> start identifier at AdditiveExpr
-61: Action -> stop identifier
-62: Action -> map Group ( identifier -> Action )
-63: OneOrMoreAdditiveExprs -> AdditiveExpr
-64: OneOrMoreAdditiveExprs -> AdditiveExpr , OneOrMoreAdditiveExprs
-65: FieldOrTimer -> identifier
-66: FieldOrTimer -> identifier . identifier
-67: Group -> identifier
-68: Group -> { zero_or_more_device_identifiers }
-69: zero_or_more_device_identifiers -> 
-70: zero_or_more_device_identifiers -> one_or_more_device_identifiers
-71: one_or_more_device_identifiers -> identifier
-72: one_or_more_device_identifiers -> identifier , one_or_more_device_identifiers
+5: OneOrMoreRules -> Rules
+6: OneOrMoreRules -> Rule OneOrMoreRules
+7: OneOrMoreRules -> Rules OneOrMoreRules
+8: Rule -> rule string_literal ZeroOrMoreDecls EventHandler ; OneOrMorePredicateActions end
+9: ZeroOrMoreDecls -> 
+10: ZeroOrMoreDecls -> Decl ZeroOrMoreDecls
+11: Decl -> device identifier : identifier ;
+12: Decl -> input identifier : identifier ;
+13: Decl -> output identifier : identifier ;
+14: Decl -> output identifier : ( OneOrMoreIdentifiers ) ;
+15: OneOrMoreIdentifiers -> identifier
+16: OneOrMoreIdentifiers -> identifier , OneOrMoreIdentifiers
+17: EventHandler -> FieldOrTimer [ . ~> ]
+18: EventHandler -> FieldOrTimer [ . ~> Constant ]
+19: EventHandler -> FieldOrTimer [ Constant ~> ]
+20: EventHandler -> FieldOrTimer [ Constant ~> Constant ]
+21: EventHandler -> any Group ( identifier -> EventHandler )
+22: OneOrMorePredicateActions -> Predicate ; Actions
+23: OneOrMorePredicateActions -> Predicate ; Actions | OneOrMorePredicateActions
+24: Predicate -> OrPred
+25: Predicate -> all Group ( identifier -> Predicate )
+26: Predicate -> exists Group ( identifier -> Predicate )
+27: OrPred -> OrPred || AndPred
+28: OrPred -> AndPred
+29: AndPred -> AndPred && EqNeqPred
+30: AndPred -> EqNeqPred
+31: EqNeqPred -> EqNeqPred == CompExpr
+32: EqNeqPred -> EqNeqPred != CompExpr
+33: EqNeqPred -> CompExpr
+34: CompExpr -> CompExpr < AdditiveExpr
+35: CompExpr -> CompExpr <= AdditiveExpr
+36: CompExpr -> CompExpr > AdditiveExpr
+37: CompExpr -> CompExpr >= AdditiveExpr
+38: CompExpr -> AdditiveExpr
+39: AdditiveExpr -> AdditiveExpr + MultiplicativeExpr
+40: AdditiveExpr -> AdditiveExpr - MultiplicativeExpr
+41: AdditiveExpr -> MultiplicativeExpr
+42: MultiplicativeExpr -> MultiplicativeExpr * UnaryExpr
+43: MultiplicativeExpr -> MultiplicativeExpr / UnaryExpr
+44: MultiplicativeExpr -> UnaryExpr
+45: UnaryExpr -> - PrimaryExpr
+46: UnaryExpr -> ~ PrimaryExpr
+47: UnaryExpr -> PrimaryExpr
+48: PrimaryExpr -> true
+49: PrimaryExpr -> false
+50: PrimaryExpr -> number_literal
+51: PrimaryExpr -> string_literal
+52: PrimaryExpr -> FieldOrTimer
+53: PrimaryExpr -> ( Predicate )
+54: Constant -> identifier
+55: Constant -> number_literal
+56: Actions -> 
+57: Actions -> OneOrMoreActions
+58: OneOrMoreActions -> Action
+59: OneOrMoreActions -> Action , OneOrMoreActions
+60: Action -> FieldOrTimer := AdditiveExpr
+61: Action -> identifier ( OneOrMoreAdditiveExprs )
+62: Action -> start identifier at AdditiveExpr
+63: Action -> stop identifier
+64: Action -> map Group ( identifier -> Action )
+65: OneOrMoreAdditiveExprs -> AdditiveExpr
+66: OneOrMoreAdditiveExprs -> AdditiveExpr , OneOrMoreAdditiveExprs
+67: FieldOrTimer -> identifier
+68: FieldOrTimer -> identifier . identifier
+69: Group -> identifier
+70: Group -> { zero_or_more_device_identifiers }
+71: zero_or_more_device_identifiers -> 
+72: zero_or_more_device_identifiers -> one_or_more_device_identifiers
+73: one_or_more_device_identifiers -> identifier
+74: one_or_more_device_identifiers -> identifier , one_or_more_device_identifiers

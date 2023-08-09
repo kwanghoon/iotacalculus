@@ -14,4 +14,3 @@ rules "A conflict would result if a person were to leave the garage and enter th
     light.switch := off
   end
 end
-

@@ -5,7 +5,7 @@ rule "Turn on the hallway light when the front door unlocks."
 
   front_door.lock [ locked ~> ] ;    // event handler
   front_door.lock == unlocked ;        // condition
-  hallway_light_switch := on          // action
+  hallway_light.switch := on          // action
 
 end
 

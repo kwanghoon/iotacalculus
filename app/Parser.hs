@@ -35,7 +35,11 @@ parserSpec = ParserSpec
 
       ruleWithNoAction "OneOrMoreRules -> Rule",
       
+      ruleWithNoAction "OneOrMoreRules -> Rules",
+      
       ruleWithNoAction "OneOrMoreRules -> Rule OneOrMoreRules",
+
+      ruleWithNoAction "OneOrMoreRules -> Rules OneOrMoreRules",
 
       ruleWithNoAction "Rule -> rule string_literal ZeroOrMoreDecls EventHandler ; OneOrMorePredicateActions end",
 
@@ -145,7 +149,7 @@ parserSpec = ParserSpec
 
       ruleWithNoAction "Action -> FieldOrTimer := AdditiveExpr",
 
-      ruleWithNoAction "Action -> FieldOrTimer := ( OneOrMoreAdditiveExprs )",
+      ruleWithNoAction "Action -> identifier ( OneOrMoreAdditiveExprs )",
       
       ruleWithNoAction "Action -> start identifier at AdditiveExpr",
       
