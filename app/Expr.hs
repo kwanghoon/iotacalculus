@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveDataTypeable, DeriveGeneric #-}
+{-# LANGUAGE DeriveGeneric #-}
 
 module Expr where
 
@@ -37,7 +37,7 @@ toJson = encodePretty
 data Rule =
     NodeRule Description Decls Rules
   | LeafRule Description Decls EMCA
-  deriving (Show, Typeable, Data, Generic)
+  deriving (Show, Generic)
 
 instance FromJSON Rule
 instance ToJSON Rule
@@ -48,7 +48,7 @@ data Decl =
     DeviceDecl Name Capability
   | InputDecl Name ValueType
   | OutputDecl Name [ ValueType ]
-  deriving (Show, Typeable, Data, Generic)
+  deriving (Show, Generic)
 
 instance FromJSON Decl
 instance ToJSON Decl
@@ -57,7 +57,7 @@ type Decls = [ Decl ]
 
 data EMCA = 
     EMCA EventHandler MultiplePredicateActions
-  deriving (Show, Typeable, Data, Generic)
+  deriving (Show, Generic)
 
 instance FromJSON EMCA
 instance ToJSON EMCA
@@ -72,7 +72,7 @@ data EventHandler =
   | EventFrom FieldOrTimer EventConstant            -- fOrM [ Constant ~> ]
   | Event FieldOrTimer EventConstant EventConstant  -- fOrM [ Constant ~> Constant' ]
   | GroupEvent Group BoundVariable EventHandler     -- any group ( x -> predicate )
-  deriving (Show, Typeable, Data, Generic)
+  deriving (Show, Generic)
 
 instance FromJSON EventHandler
 instance ToJSON EventHandler
@@ -91,7 +91,7 @@ data Predicate =
   | GreaterThan Predicate Expression -- may look strange
   | GreaterThanOrEqualTo Predicate Expression -- may look strange
   | ExpressionPredicate Expression
-  deriving (Show, Typeable, Data, Generic)
+  deriving (Show, Generic)
 
 instance FromJSON Predicate
 instance ToJSON Predicate
@@ -107,7 +107,7 @@ data Expression =
   | Field DeviceName AttributeName
   | Timer TimerName
   | PredicateExpression Predicate
-  deriving (Show, Typeable, Data, Generic)
+  deriving (Show, Generic)
 
 instance FromJSON Expression
 instance ToJSON Expression
@@ -117,7 +117,7 @@ data Literal =
   | NumberLiteral Integer
   | StringLiteral String
   | ConstantLiteral String
-  deriving (Show, Typeable, Data, Generic)
+  deriving (Show, Generic)
 
 instance FromJSON Literal
 instance ToJSON Literal
@@ -133,7 +133,7 @@ data Action =
   | StartTimer TimerName Expression
   | StopTimer TimerName
   | MapAction Group BoundVariable Action
-  deriving (Show, Typeable, Data, Generic)
+  deriving (Show, Generic)
 
 instance FromJSON Action
 instance ToJSON Action
