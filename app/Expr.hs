@@ -3,6 +3,7 @@
 module Expr where
 
 import Data.Aeson
+import Data.Aeson.Encode.Pretty (encodePretty)
 import Data.Char
 import Data.List (lookup)
 import Data.Text.Prettyprint.Doc hiding (Pretty)
@@ -11,6 +12,9 @@ import Data.Text.Prettyprint.Doc.Util
 import Text.JSON.Generic
 
 import GHC.Generics
+
+import qualified Data.ByteString.Lazy.Char8 as B
+
 
 --
 type Description = String
@@ -26,6 +30,9 @@ type TimerName = Name
 type Capability = String
 
 type ValueType = String
+
+toJson :: Rule -> B.ByteString
+toJson = encodePretty
 
 data Rule =
     NodeRule Description Decls Rules

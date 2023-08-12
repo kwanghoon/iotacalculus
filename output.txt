@@ -1,0 +1,1469 @@
+args:
+./examples/conflict-example-turn-on-or-turn-off-the-light.iota
+Parsing...
+parse time:   0.08s
+{
+    "contents": [
+        "\"A conflict arises because we cannot predict if the lights will be on or off when the first rules fires two events.\"",
+        [
+            {
+                "contents": [
+                    "person",
+                    "presenceSensor"
+                ],
+                "tag": "DeviceDecl"
+            },
+            {
+                "contents": [
+                    "light",
+                    "switch"
+                ],
+                "tag": "DeviceDecl"
+            },
+            {
+                "contents": [
+                    "tv",
+                    "switch"
+                ],
+                "tag": "DeviceDecl"
+            },
+            {
+                "contents": [
+                    "door",
+                    "lock"
+                ],
+                "tag": "DeviceDecl"
+            }
+        ],
+        [
+            {
+                "contents": [
+                    "\"Unlock the door and turn on TV when a person enters the house.\"",
+                    [],
+                    [
+                        {
+                            "contents": [
+                                {
+                                    "contents": [
+                                        "person",
+                                        "presence"
+                                    ],
+                                    "tag": "Field"
+                                },
+                                "home"
+                            ],
+                            "tag": "EventTo"
+                        },
+                        [
+                            [
+                                {
+                                    "contents": {
+                                        "contents": {
+                                            "contents": true,
+                                            "tag": "BoolLiteral"
+                                        },
+                                        "tag": "LiteralExpression"
+                                    },
+                                    "tag": "ExpressionPredicate"
+                                },
+                                [
+                                    {
+                                        "contents": [
+                                            {
+                                                "contents": [
+                                                    "door",
+                                                    "lock"
+                                                ],
+                                                "tag": "Field"
+                                            },
+                                            {
+                                                "contents": "unlocked",
+                                                "tag": "Timer"
+                                            }
+                                        ],
+                                        "tag": "CommandAction"
+                                    },
+                                    {
+                                        "contents": [
+                                            {
+                                                "contents": [
+                                                    "tv",
+                                                    "switch"
+                                                ],
+                                                "tag": "Field"
+                                            },
+                                            {
+                                                "contents": "on",
+                                                "tag": "Timer"
+                                            }
+                                        ],
+                                        "tag": "CommandAction"
+                                    }
+                                ]
+                            ]
+                        ]
+                    ]
+                ],
+                "tag": "LeafRule"
+            },
+            {
+                "contents": [
+                    "\"Turn on the light when the door unlocks.\"",
+                    [],
+                    [
+                        {
+                            "contents": [
+                                {
+                                    "contents": [
+                                        "door",
+                                        "lock"
+                                    ],
+                                    "tag": "Field"
+                                },
+                                "unlocked"
+                            ],
+                            "tag": "EventTo"
+                        },
+                        [
+                            [
+                                {
+                                    "contents": {
+                                        "contents": {
+                                            "contents": true,
+                                            "tag": "BoolLiteral"
+                                        },
+                                        "tag": "LiteralExpression"
+                                    },
+                                    "tag": "ExpressionPredicate"
+                                },
+                                [
+                                    {
+                                        "contents": [
+                                            {
+                                                "contents": [
+                                                    "light",
+                                                    "switch"
+                                                ],
+                                                "tag": "Field"
+                                            },
+                                            {
+                                                "contents": "on",
+                                                "tag": "Timer"
+                                            }
+                                        ],
+                                        "tag": "CommandAction"
+                                    }
+                                ]
+                            ]
+                        ]
+                    ]
+                ],
+                "tag": "LeafRule"
+            },
+            {
+                "contents": [
+                    "\"Turn off the light when the TV is turned on.\"",
+                    [],
+                    [
+                        {
+                            "contents": [
+                                {
+                                    "contents": [
+                                        "tv",
+                                        "switch"
+                                    ],
+                                    "tag": "Field"
+                                },
+                                "on"
+                            ],
+                            "tag": "EventTo"
+                        },
+                        [
+                            [
+                                {
+                                    "contents": {
+                                        "contents": {
+                                            "contents": true,
+                                            "tag": "BoolLiteral"
+                                        },
+                                        "tag": "LiteralExpression"
+                                    },
+                                    "tag": "ExpressionPredicate"
+                                },
+                                [
+                                    {
+                                        "contents": [
+                                            {
+                                                "contents": [
+                                                    "light",
+                                                    "switch"
+                                                ],
+                                                "tag": "Field"
+                                            },
+                                            {
+                                                "contents": "off",
+                                                "tag": "Timer"
+                                            }
+                                        ],
+                                        "tag": "CommandAction"
+                                    }
+                                ]
+                            ]
+                        ]
+                    ]
+                ],
+                "tag": "LeafRule"
+            }
+        ]
+    ],
+    "tag": "NodeRule"
+}
+Done.
+args:
+./examples/christmas-lamps-on.iota
+Parsing...
+parse time:   0.12s
+{
+    "contents": [
+        "\"Christmas lamps on\"",
+        [
+            {
+                "contents": [
+                    "livingroom",
+                    "socket"
+                ],
+                "tag": "DeviceDecl"
+            },
+            {
+                "contents": [
+                    "floor",
+                    "socket"
+                ],
+                "tag": "DeviceDecl"
+            },
+            {
+                "contents": [
+                    "clock",
+                    "time"
+                ],
+                "tag": "InputDecl"
+            },
+            {
+                "contents": [
+                    "state_auto_christmas",
+                    "boolean"
+                ],
+                "tag": "InputDecl"
+            },
+            {
+                "contents": [
+                    "state_sleeping",
+                    "switch"
+                ],
+                "tag": "InputDecl"
+            }
+        ],
+        [
+            {
+                "contents": [
+                    "\"Turn the living room and floor sockets on at 4pm if Christmas mode is enabled.\"",
+                    [],
+                    [
+                        {
+                            "contents": [
+                                {
+                                    "contents": [
+                                        "clock",
+                                        "hour"
+                                    ],
+                                    "tag": "Field"
+                                },
+                                "16"
+                            ],
+                            "tag": "EventTo"
+                        },
+                        [
+                            [
+                                {
+                                    "contents": [
+                                        {
+                                            "contents": [
+                                                {
+                                                    "contents": {
+                                                        "contents": "state_auto_christmas",
+                                                        "tag": "Timer"
+                                                    },
+                                                    "tag": "ExpressionPredicate"
+                                                },
+                                                {
+                                                    "contents": {
+                                                        "contents": {
+                                                            "contents": true,
+                                                            "tag": "BoolLiteral"
+                                                        },
+                                                        "tag": "LiteralExpression"
+                                                    },
+                                                    "tag": "ExpressionPredicate"
+                                                }
+                                            ],
+                                            "tag": "IsEqual"
+                                        },
+                                        {
+                                            "contents": {
+                                                "contents": {
+                                                    "contents": [
+                                                        [
+                                                            "livingroom",
+                                                            "floor"
+                                                        ],
+                                                        "x",
+                                                        {
+                                                            "contents": [
+                                                                {
+                                                                    "contents": {
+                                                                        "contents": [
+                                                                            "x",
+                                                                            "socket"
+                                                                        ],
+                                                                        "tag": "Field"
+                                                                    },
+                                                                    "tag": "ExpressionPredicate"
+                                                                },
+                                                                {
+                                                                    "contents": {
+                                                                        "contents": "off",
+                                                                        "tag": "Timer"
+                                                                    },
+                                                                    "tag": "ExpressionPredicate"
+                                                                }
+                                                            ],
+                                                            "tag": "IsEqual"
+                                                        }
+                                                    ],
+                                                    "tag": "Exists"
+                                                },
+                                                "tag": "PredicateExpression"
+                                            },
+                                            "tag": "ExpressionPredicate"
+                                        }
+                                    ],
+                                    "tag": "LogicalAnd"
+                                },
+                                [
+                                    {
+                                        "contents": [
+                                            [
+                                                "livingroom",
+                                                "floor"
+                                            ],
+                                            "x",
+                                            {
+                                                "contents": [
+                                                    {
+                                                        "contents": [
+                                                            "x",
+                                                            "socket"
+                                                        ],
+                                                        "tag": "Field"
+                                                    },
+                                                    {
+                                                        "contents": "on",
+                                                        "tag": "Timer"
+                                                    }
+                                                ],
+                                                "tag": "CommandAction"
+                                            }
+                                        ],
+                                        "tag": "MapAction"
+                                    }
+                                ]
+                            ]
+                        ]
+                    ]
+                ],
+                "tag": "LeafRule"
+            },
+            {
+                "contents": [
+                    "\"When the household wakes up, if it is before 10am and Christmas mode is enabled, turn the living room and floor sockets on.\"",
+                    [],
+                    [
+                        {
+                            "contents": [
+                                {
+                                    "contents": "state_sleeping",
+                                    "tag": "Timer"
+                                },
+                                "off"
+                            ],
+                            "tag": "EventTo"
+                        },
+                        [
+                            [
+                                {
+                                    "contents": [
+                                        {
+                                            "contents": [
+                                                {
+                                                    "contents": [
+                                                        {
+                                                            "contents": {
+                                                                "contents": "state_auto_christmas",
+                                                                "tag": "Timer"
+                                                            },
+                                                            "tag": "ExpressionPredicate"
+                                                        },
+                                                        {
+                                                            "contents": {
+                                                                "contents": {
+                                                                    "contents": true,
+                                                                    "tag": "BoolLiteral"
+                                                                },
+                                                                "tag": "LiteralExpression"
+                                                            },
+                                                            "tag": "ExpressionPredicate"
+                                                        }
+                                                    ],
+                                                    "tag": "IsEqual"
+                                                },
+                                                {
+                                                    "contents": [
+                                                        {
+                                                            "contents": {
+                                                                "contents": [
+                                                                    "clock",
+                                                                    "hour"
+                                                                ],
+                                                                "tag": "Field"
+                                                            },
+                                                            "tag": "ExpressionPredicate"
+                                                        },
+                                                        {
+                                                            "contents": {
+                                                                "contents": 10,
+                                                                "tag": "NumberLiteral"
+                                                            },
+                                                            "tag": "LiteralExpression"
+                                                        }
+                                                    ],
+                                                    "tag": "LessThan"
+                                                }
+                                            ],
+                                            "tag": "LogicalAnd"
+                                        },
+                                        {
+                                            "contents": {
+                                                "contents": {
+                                                    "contents": [
+                                                        [
+                                                            "livingroom",
+                                                            "floor"
+                                                        ],
+                                                        "x",
+                                                        {
+                                                            "contents": [
+                                                                {
+                                                                    "contents": {
+                                                                        "contents": [
+                                                                            "x",
+                                                                            "socket"
+                                                                        ],
+                                                                        "tag": "Field"
+                                                                    },
+                                                                    "tag": "ExpressionPredicate"
+                                                                },
+                                                                {
+                                                                    "contents": {
+                                                                        "contents": "off",
+                                                                        "tag": "Timer"
+                                                                    },
+                                                                    "tag": "ExpressionPredicate"
+                                                                }
+                                                            ],
+                                                            "tag": "IsEqual"
+                                                        }
+                                                    ],
+                                                    "tag": "Exists"
+                                                },
+                                                "tag": "PredicateExpression"
+                                            },
+                                            "tag": "ExpressionPredicate"
+                                        }
+                                    ],
+                                    "tag": "LogicalAnd"
+                                },
+                                [
+                                    {
+                                        "contents": [
+                                            [
+                                                "livingroom",
+                                                "floor"
+                                            ],
+                                            "x",
+                                            {
+                                                "contents": [
+                                                    {
+                                                        "contents": [
+                                                            "x",
+                                                            "socket"
+                                                        ],
+                                                        "tag": "Field"
+                                                    },
+                                                    {
+                                                        "contents": "on",
+                                                        "tag": "Timer"
+                                                    }
+                                                ],
+                                                "tag": "CommandAction"
+                                            }
+                                        ],
+                                        "tag": "MapAction"
+                                    }
+                                ]
+                            ]
+                        ]
+                    ]
+                ],
+                "tag": "LeafRule"
+            }
+        ]
+    ],
+    "tag": "NodeRule"
+}
+Done.
+args:
+./examples/turn-on-hallway-light-when-the-front-door-unlocks.iota
+Parsing...
+parse time:   0.02s
+{
+    "contents": [
+        "\"Turn on the hallway light when the front door unlocks.\"",
+        [
+            {
+                "contents": [
+                    "front_door",
+                    "lock"
+                ],
+                "tag": "DeviceDecl"
+            },
+            {
+                "contents": [
+                    "hallway_light",
+                    "switch"
+                ],
+                "tag": "DeviceDecl"
+            }
+        ],
+        [
+            {
+                "contents": [
+                    {
+                        "contents": [
+                            "front_door",
+                            "lock"
+                        ],
+                        "tag": "Field"
+                    },
+                    "locked"
+                ],
+                "tag": "EventFrom"
+            },
+            [
+                [
+                    {
+                        "contents": [
+                            {
+                                "contents": {
+                                    "contents": [
+                                        "front_door",
+                                        "lock"
+                                    ],
+                                    "tag": "Field"
+                                },
+                                "tag": "ExpressionPredicate"
+                            },
+                            {
+                                "contents": {
+                                    "contents": "unlocked",
+                                    "tag": "Timer"
+                                },
+                                "tag": "ExpressionPredicate"
+                            }
+                        ],
+                        "tag": "IsEqual"
+                    },
+                    [
+                        {
+                            "contents": [
+                                {
+                                    "contents": [
+                                        "hallway_light",
+                                        "switch"
+                                    ],
+                                    "tag": "Field"
+                                },
+                                {
+                                    "contents": "on",
+                                    "tag": "Timer"
+                                }
+                            ],
+                            "tag": "CommandAction"
+                        }
+                    ]
+                ]
+            ]
+        ]
+    ],
+    "tag": "LeafRule"
+}
+Done.
+args:
+./examples/conflict-example-leave-the-garage-and-enter-the-house.iota
+Parsing...
+parse time:   0.03s
+{
+    "contents": [
+        "\"A conflict would result if a person were to leave the garage and enter the house.\"",
+        [
+            {
+                "contents": [
+                    "person",
+                    "presenceSensor"
+                ],
+                "tag": "DeviceDecl"
+            },
+            {
+                "contents": [
+                    "light",
+                    "switch"
+                ],
+                "tag": "DeviceDecl"
+            }
+        ],
+        [
+            {
+                "contents": [
+                    "\"turn on the light when a person enters the house.\"",
+                    [],
+                    [
+                        {
+                            "contents": [
+                                {
+                                    "contents": [
+                                        "person",
+                                        "presence"
+                                    ],
+                                    "tag": "Field"
+                                },
+                                "home"
+                            ],
+                            "tag": "EventTo"
+                        },
+                        [
+                            [
+                                {
+                                    "contents": {
+                                        "contents": {
+                                            "contents": true,
+                                            "tag": "BoolLiteral"
+                                        },
+                                        "tag": "LiteralExpression"
+                                    },
+                                    "tag": "ExpressionPredicate"
+                                },
+                                [
+                                    {
+                                        "contents": [
+                                            {
+                                                "contents": [
+                                                    "light",
+                                                    "switch"
+                                                ],
+                                                "tag": "Field"
+                                            },
+                                            {
+                                                "contents": "on",
+                                                "tag": "Timer"
+                                            }
+                                        ],
+                                        "tag": "CommandAction"
+                                    }
+                                ]
+                            ]
+                        ]
+                    ]
+                ],
+                "tag": "LeafRule"
+            },
+            {
+                "contents": [
+                    "\"turn off the light when a person leaves the garage.\"",
+                    [],
+                    [
+                        {
+                            "contents": [
+                                {
+                                    "contents": [
+                                        "person",
+                                        "presence"
+                                    ],
+                                    "tag": "Field"
+                                },
+                                "home"
+                            ],
+                            "tag": "EventFrom"
+                        },
+                        [
+                            [
+                                {
+                                    "contents": {
+                                        "contents": {
+                                            "contents": true,
+                                            "tag": "BoolLiteral"
+                                        },
+                                        "tag": "LiteralExpression"
+                                    },
+                                    "tag": "ExpressionPredicate"
+                                },
+                                [
+                                    {
+                                        "contents": [
+                                            {
+                                                "contents": [
+                                                    "light",
+                                                    "switch"
+                                                ],
+                                                "tag": "Field"
+                                            },
+                                            {
+                                                "contents": "off",
+                                                "tag": "Timer"
+                                            }
+                                        ],
+                                        "tag": "CommandAction"
+                                    }
+                                ]
+                            ]
+                        ]
+                    ]
+                ],
+                "tag": "LeafRule"
+            }
+        ]
+    ],
+    "tag": "NodeRule"
+}
+Done.
+args:
+./examples/turn-on-siren-when-no-one-is-present.iota
+Parsing...
+parse time:   0.12s
+{
+    "contents": [
+        "\"turn on siren when no one is present at home\"",
+        [
+            {
+                "contents": [
+                    "front_door",
+                    "lock"
+                ],
+                "tag": "DeviceDecl"
+            },
+            {
+                "contents": [
+                    "whoisathome",
+                    "presenceSensor"
+                ],
+                "tag": "DeviceDecl"
+            },
+            {
+                "contents": [
+                    "hallway_light",
+                    "switch"
+                ],
+                "tag": "DeviceDecl"
+            },
+            {
+                "contents": [
+                    "hallway_player",
+                    "mediaPlayback"
+                ],
+                "tag": "DeviceDecl"
+            },
+            {
+                "contents": [
+                    "hallway_alarm",
+                    "alarm"
+                ],
+                "tag": "DeviceDecl"
+            },
+            {
+                "contents": [
+                    "phone_number",
+                    "phone"
+                ],
+                "tag": "InputDecl"
+            },
+            {
+                "contents": [
+                    "message",
+                    "string"
+                ],
+                "tag": "InputDecl"
+            },
+            {
+                "contents": [
+                    "pushMessage",
+                    [
+                        "string"
+                    ]
+                ],
+                "tag": "OutputDecl"
+            }
+        ],
+        [
+            {
+                "contents": [
+                    {
+                        "contents": [
+                            "front_door",
+                            "lock"
+                        ],
+                        "tag": "Field"
+                    },
+                    "locked",
+                    "unlocked"
+                ],
+                "tag": "Event"
+            },
+            [
+                [
+                    {
+                        "contents": [
+                            {
+                                "contents": {
+                                    "contents": [
+                                        "whoisathome",
+                                        "presence"
+                                    ],
+                                    "tag": "Field"
+                                },
+                                "tag": "ExpressionPredicate"
+                            },
+                            {
+                                "contents": {
+                                    "contents": "present",
+                                    "tag": "Timer"
+                                },
+                                "tag": "ExpressionPredicate"
+                            }
+                        ],
+                        "tag": "IsEqual"
+                    },
+                    [
+                        {
+                            "contents": [
+                                {
+                                    "contents": [
+                                        "hallway_light",
+                                        "switch"
+                                    ],
+                                    "tag": "Field"
+                                },
+                                {
+                                    "contents": "on",
+                                    "tag": "Timer"
+                                }
+                            ],
+                            "tag": "CommandAction"
+                        },
+                        {
+                            "contents": [
+                                {
+                                    "contents": "hallway_player",
+                                    "tag": "Timer"
+                                },
+                                {
+                                    "contents": "play",
+                                    "tag": "Timer"
+                                }
+                            ],
+                            "tag": "CommandAction"
+                        }
+                    ]
+                ],
+                [
+                    {
+                        "contents": [
+                            {
+                                "contents": {
+                                    "contents": [
+                                        "whoisathome",
+                                        "presence"
+                                    ],
+                                    "tag": "Field"
+                                },
+                                "tag": "ExpressionPredicate"
+                            },
+                            {
+                                "contents": {
+                                    "contents": "present",
+                                    "tag": "Timer"
+                                },
+                                "tag": "ExpressionPredicate"
+                            }
+                        ],
+                        "tag": "IsInequal"
+                    },
+                    [
+                        {
+                            "contents": [
+                                {
+                                    "contents": "hallway_alarm",
+                                    "tag": "Timer"
+                                },
+                                {
+                                    "contents": "siren",
+                                    "tag": "Timer"
+                                }
+                            ],
+                            "tag": "CommandAction"
+                        },
+                        {
+                            "contents": [
+                                "pushMessage",
+                                [
+                                    {
+                                        "contents": {
+                                            "contents": "\"An unexpected guest!\"",
+                                            "tag": "StringLiteral"
+                                        },
+                                        "tag": "LiteralExpression"
+                                    }
+                                ]
+                            ],
+                            "tag": "OutputAction"
+                        }
+                    ]
+                ]
+            ]
+        ]
+    ],
+    "tag": "LeafRule"
+}
+Done.
+args:
+./examples/turn-off-hallway-light-five-minutes-after-the-front-door-locks.iota
+Parsing...
+parse time:   0.06s
+{
+    "contents": [
+        "\"Turn off the hallway light five minutes after the door locks\"",
+        [
+            {
+                "contents": [
+                    "front_door",
+                    "lock"
+                ],
+                "tag": "DeviceDecl"
+            },
+            {
+                "contents": [
+                    "hallway_light",
+                    "switch"
+                ],
+                "tag": "DeviceDecl"
+            }
+        ],
+        [
+            {
+                "contents": [
+                    "\"start a timer when the door locks.\"",
+                    [],
+                    [
+                        {
+                            "contents": [
+                                {
+                                    "contents": [
+                                        "front_door",
+                                        "lock"
+                                    ],
+                                    "tag": "Field"
+                                },
+                                "unlocked"
+                            ],
+                            "tag": "EventFrom"
+                        },
+                        [
+                            [
+                                {
+                                    "contents": [
+                                        {
+                                            "contents": {
+                                                "contents": [
+                                                    "front_door",
+                                                    "lock"
+                                                ],
+                                                "tag": "Field"
+                                            },
+                                            "tag": "ExpressionPredicate"
+                                        },
+                                        {
+                                            "contents": {
+                                                "contents": "locked",
+                                                "tag": "Timer"
+                                            },
+                                            "tag": "ExpressionPredicate"
+                                        }
+                                    ],
+                                    "tag": "IsEqual"
+                                },
+                                [
+                                    {
+                                        "contents": [
+                                            "light_timer",
+                                            {
+                                                "contents": {
+                                                    "contents": 0,
+                                                    "tag": "NumberLiteral"
+                                                },
+                                                "tag": "LiteralExpression"
+                                            }
+                                        ],
+                                        "tag": "StartTimer"
+                                    }
+                                ]
+                            ]
+                        ]
+                    ]
+                ],
+                "tag": "LeafRule"
+            },
+            {
+                "contents": [
+                    "\"turn off the the hallway light and stop the timer when the timer reaches five minutes.\"",
+                    [],
+                    [
+                        {
+                            "contents": {
+                                "contents": "light_timer",
+                                "tag": "Timer"
+                            },
+                            "tag": "JustEvent"
+                        },
+                        [
+                            [
+                                {
+                                    "contents": [
+                                        {
+                                            "contents": {
+                                                "contents": "light_timer",
+                                                "tag": "Timer"
+                                            },
+                                            "tag": "ExpressionPredicate"
+                                        },
+                                        {
+                                            "contents": {
+                                                "contents": {
+                                                    "contents": 5,
+                                                    "tag": "NumberLiteral"
+                                                },
+                                                "tag": "LiteralExpression"
+                                            },
+                                            "tag": "ExpressionPredicate"
+                                        }
+                                    ],
+                                    "tag": "IsEqual"
+                                },
+                                [
+                                    {
+                                        "contents": [
+                                            {
+                                                "contents": [
+                                                    "hallway_light",
+                                                    "switch"
+                                                ],
+                                                "tag": "Field"
+                                            },
+                                            {
+                                                "contents": "off",
+                                                "tag": "Timer"
+                                            }
+                                        ],
+                                        "tag": "CommandAction"
+                                    },
+                                    {
+                                        "contents": "light_timer",
+                                        "tag": "StopTimer"
+                                    }
+                                ]
+                            ]
+                        ]
+                    ]
+                ],
+                "tag": "LeafRule"
+            }
+        ]
+    ],
+    "tag": "NodeRule"
+}
+Done.
+args:
+./examples/turn-off-hallway-light-when-all-family-members-are-outside-the-house-for-more-than-ten-minutes.iota
+Parsing...
+parse time:   0.09s
+{
+    "contents": [
+        "\"Turn off the hallway light when all family members' smartphones have been outside the house geofence for more than ten minutes\"",
+        [
+            {
+                "contents": [
+                    "mom_phone",
+                    "locationMode"
+                ],
+                "tag": "DeviceDecl"
+            },
+            {
+                "contents": [
+                    "dad_phone",
+                    "locationMode"
+                ],
+                "tag": "DeviceDecl"
+            },
+            {
+                "contents": [
+                    "child_phone",
+                    "locationMode"
+                ],
+                "tag": "DeviceDecl"
+            },
+            {
+                "contents": [
+                    "hallway_light",
+                    "switch"
+                ],
+                "tag": "DeviceDecl"
+            }
+        ],
+        [
+            {
+                "contents": [
+                    "\"Start a timer when all family members' smartphones have been outside the house geofence\"",
+                    [],
+                    [
+                        {
+                            "contents": [
+                                [
+                                    "mom_phone",
+                                    "dad_phone",
+                                    "child_phone"
+                                ],
+                                "phone",
+                                {
+                                    "contents": {
+                                        "contents": [
+                                            "phone",
+                                            "mode"
+                                        ],
+                                        "tag": "Field"
+                                    },
+                                    "tag": "JustEvent"
+                                }
+                            ],
+                            "tag": "GroupEvent"
+                        },
+                        [
+                            [
+                                {
+                                    "contents": [
+                                        [
+                                            "mom_phone",
+                                            "dad_phone",
+                                            "child_phone"
+                                        ],
+                                        "phone",
+                                        {
+                                            "contents": [
+                                                {
+                                                    "contents": {
+                                                        "contents": [
+                                                            "phone",
+                                                            "mode"
+                                                        ],
+                                                        "tag": "Field"
+                                                    },
+                                                    "tag": "ExpressionPredicate"
+                                                },
+                                                {
+                                                    "contents": {
+                                                        "contents": "away",
+                                                        "tag": "Timer"
+                                                    },
+                                                    "tag": "ExpressionPredicate"
+                                                }
+                                            ],
+                                            "tag": "IsEqual"
+                                        }
+                                    ],
+                                    "tag": "Forall"
+                                },
+                                [
+                                    {
+                                        "contents": [
+                                            {
+                                                "contents": "timer",
+                                                "tag": "Timer"
+                                            },
+                                            {
+                                                "contents": {
+                                                    "contents": 0,
+                                                    "tag": "NumberLiteral"
+                                                },
+                                                "tag": "LiteralExpression"
+                                            }
+                                        ],
+                                        "tag": "CommandAction"
+                                    }
+                                ]
+                            ]
+                        ]
+                    ]
+                ],
+                "tag": "LeafRule"
+            },
+            {
+                "contents": [
+                    "\"Turn off the hallway light when when all family members' smartphones have been outside the house geofence and the timer reaches 10 minutes\"",
+                    [],
+                    [
+                        {
+                            "contents": [
+                                {
+                                    "contents": "timer",
+                                    "tag": "Timer"
+                                },
+                                "10"
+                            ],
+                            "tag": "EventTo"
+                        },
+                        [
+                            [
+                                {
+                                    "contents": [
+                                        [
+                                            "mom_phone",
+                                            "dad_phone",
+                                            "child_phone"
+                                        ],
+                                        "phone",
+                                        {
+                                            "contents": [
+                                                {
+                                                    "contents": {
+                                                        "contents": [
+                                                            "phone",
+                                                            "mode"
+                                                        ],
+                                                        "tag": "Field"
+                                                    },
+                                                    "tag": "ExpressionPredicate"
+                                                },
+                                                {
+                                                    "contents": {
+                                                        "contents": "away",
+                                                        "tag": "Timer"
+                                                    },
+                                                    "tag": "ExpressionPredicate"
+                                                }
+                                            ],
+                                            "tag": "IsEqual"
+                                        }
+                                    ],
+                                    "tag": "Forall"
+                                },
+                                [
+                                    {
+                                        "contents": [
+                                            {
+                                                "contents": [
+                                                    "hallway_light",
+                                                    "switch"
+                                                ],
+                                                "tag": "Field"
+                                            },
+                                            {
+                                                "contents": "off",
+                                                "tag": "Timer"
+                                            }
+                                        ],
+                                        "tag": "CommandAction"
+                                    }
+                                ]
+                            ]
+                        ]
+                    ]
+                ],
+                "tag": "LeafRule"
+            }
+        ]
+    ],
+    "tag": "NodeRule"
+}
+Done.
+args:
+./examples/conflict-example-turn-off-the-lights-and-then-immediately-turn-on-the-lights.iota
+Parsing...
+parse time:   0.04s
+{
+    "contents": [
+        "\"Conflict example\"",
+        [
+            {
+                "contents": [
+                    "person",
+                    "presenceSensor"
+                ],
+                "tag": "DeviceDecl"
+            },
+            {
+                "contents": [
+                    "light",
+                    "switch"
+                ],
+                "tag": "DeviceDecl"
+            },
+            {
+                "contents": [
+                    "door",
+                    "lock"
+                ],
+                "tag": "DeviceDecl"
+            }
+        ],
+        [
+            {
+                "contents": [
+                    "\"Lock the door and turn off the lights when a person leaves home.\"",
+                    [],
+                    [
+                        {
+                            "contents": [
+                                {
+                                    "contents": [
+                                        "person",
+                                        "presence"
+                                    ],
+                                    "tag": "Field"
+                                },
+                                "home"
+                            ],
+                            "tag": "EventFrom"
+                        },
+                        [
+                            [
+                                {
+                                    "contents": {
+                                        "contents": {
+                                            "contents": true,
+                                            "tag": "BoolLiteral"
+                                        },
+                                        "tag": "LiteralExpression"
+                                    },
+                                    "tag": "ExpressionPredicate"
+                                },
+                                [
+                                    {
+                                        "contents": [
+                                            {
+                                                "contents": [
+                                                    "door",
+                                                    "lock"
+                                                ],
+                                                "tag": "Field"
+                                            },
+                                            {
+                                                "contents": "locked",
+                                                "tag": "Timer"
+                                            }
+                                        ],
+                                        "tag": "CommandAction"
+                                    },
+                                    {
+                                        "contents": [
+                                            {
+                                                "contents": [
+                                                    "lgiht",
+                                                    "switch"
+                                                ],
+                                                "tag": "Field"
+                                            },
+                                            {
+                                                "contents": "off",
+                                                "tag": "Timer"
+                                            }
+                                        ],
+                                        "tag": "CommandAction"
+                                    }
+                                ]
+                            ]
+                        ]
+                    ]
+                ],
+                "tag": "LeafRule"
+            },
+            {
+                "contents": [
+                    "\"Turn on the lights when the door's status changes.\"",
+                    [],
+                    [
+                        {
+                            "contents": {
+                                "contents": [
+                                    "door",
+                                    "lock"
+                                ],
+                                "tag": "Field"
+                            },
+                            "tag": "JustEvent"
+                        },
+                        [
+                            [
+                                {
+                                    "contents": {
+                                        "contents": {
+                                            "contents": true,
+                                            "tag": "BoolLiteral"
+                                        },
+                                        "tag": "LiteralExpression"
+                                    },
+                                    "tag": "ExpressionPredicate"
+                                },
+                                [
+                                    {
+                                        "contents": [
+                                            {
+                                                "contents": [
+                                                    "light",
+                                                    "switch"
+                                                ],
+                                                "tag": "Field"
+                                            },
+                                            {
+                                                "contents": "on",
+                                                "tag": "Timer"
+                                            }
+                                        ],
+                                        "tag": "CommandAction"
+                                    }
+                                ]
+                            ]
+                        ]
+                    ]
+                ],
+                "tag": "LeafRule"
+            }
+        ]
+    ],
+    "tag": "NodeRule"
+}
+Done.

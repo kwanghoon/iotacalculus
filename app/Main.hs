@@ -18,26 +18,12 @@ import TokenInterface
 import Data.Aeson
 import GHC.Generics
 
-------------------------------------------------------------------------
--- | Pretty printing JSON
-------------------------------------------------------------------------
-
-import qualified Data.Text as T
-import qualified Data.Text.Encoding as E
-import qualified Data.ByteString.Lazy as LBS
-import Data.Aeson.Encode.Pretty (encodePretty)
-
-import qualified Data.Text.IO as DTIO
 
 ------------------------------------------------------------------------
 -- | Pretty printing JSON
 ------------------------------------------------------------------------
 
-lsbToText :: LBS.ByteString -> T.Text
-lsbToText = E.decodeUtf8 . LBS.toStrict
-
-jsonToText :: Rule -> T.Text
-jsonToText = lsbToText . encodePretty
+import qualified Data.ByteString.Lazy.Char8 as B
 
 ------------------------------------------------------------------------
 
@@ -68,6 +54,6 @@ doProcess verbose fileName = do
             (aLexer lexerSpec) (fromToken (endOfToken lexerSpec))
   -- when (verbose) $ putStrLn (show (fromASTRule astRule))
   -- when (verbose) $ putStrLn (show (toJSON (fromASTRule astRule)))
-  when (verbose) $ DTIO.putStrLn (jsonToText (fromASTRule astRule))
+  when (verbose) $ B.putStrLn $ toJson $ fromASTRule astRule
   when (verbose) $ putStrLn "Done."
 
