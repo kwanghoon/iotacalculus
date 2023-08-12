@@ -71,7 +71,7 @@ parserSpec = ParserSpec
 
       rule "ZeroOrMoreDecls -> Decl ZeroOrMoreDecls"
         ( \rhs -> let decl  = fromASTDecl (get rhs 1)
-	              decls = fromASTDecls (get rhs 20)
+	              decls = fromASTDecls (get rhs 2)
 		  in  return $ toASTDecls (decl : decls) ),
 		  
       -- | Decl : Decl
