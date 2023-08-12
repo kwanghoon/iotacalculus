@@ -50,26 +50,27 @@
 49: PrimaryExpr -> false
 50: PrimaryExpr -> number_literal
 51: PrimaryExpr -> string_literal
-52: PrimaryExpr -> FieldOrTimer
-53: PrimaryExpr -> ( Predicate )
-54: Constant -> identifier
-55: Constant -> number_literal
-56: Actions -> 
-57: Actions -> OneOrMoreActions
-58: OneOrMoreActions -> Action
-59: OneOrMoreActions -> Action , OneOrMoreActions
-60: Action -> FieldOrTimer := AdditiveExpr
-61: Action -> identifier ( OneOrMoreAdditiveExprs )
-62: Action -> start identifier at AdditiveExpr
-63: Action -> stop identifier
-64: Action -> map Group ( identifier -> Action )
-65: OneOrMoreAdditiveExprs -> AdditiveExpr
-66: OneOrMoreAdditiveExprs -> AdditiveExpr , OneOrMoreAdditiveExprs
-67: FieldOrTimer -> identifier
-68: FieldOrTimer -> identifier . identifier
-69: Group -> identifier
-70: Group -> { zero_or_more_device_identifiers }
-71: zero_or_more_device_identifiers -> 
-72: zero_or_more_device_identifiers -> one_or_more_device_identifiers
-73: one_or_more_device_identifiers -> identifier
-74: one_or_more_device_identifiers -> identifier , one_or_more_device_identifiers
+52: PrimaryExpr -> identifier
+53: PrimaryExpr -> identifier . identifier
+54: PrimaryExpr -> ( Predicate )
+55: Constant -> identifier
+56: Constant -> number_literal
+57: Actions -> 
+58: Actions -> OneOrMoreActions
+59: OneOrMoreActions -> Action
+60: OneOrMoreActions -> Action , OneOrMoreActions
+61: Action -> FieldOrTimer := AdditiveExpr
+62: Action -> identifier ( OneOrMoreAdditiveExprs )
+63: Action -> start identifier at AdditiveExpr
+64: Action -> stop identifier
+65: Action -> map Group ( identifier -> Action )
+66: OneOrMoreAdditiveExprs -> AdditiveExpr
+67: OneOrMoreAdditiveExprs -> AdditiveExpr , OneOrMoreAdditiveExprs
+68: FieldOrTimer -> identifier
+69: FieldOrTimer -> identifier . identifier
+70: Group -> identifier
+71: Group -> { zero_or_more_device_identifiers }
+72: zero_or_more_device_identifiers -> 
+73: zero_or_more_device_identifiers -> one_or_more_device_identifiers
+74: one_or_more_device_identifiers -> identifier
+75: one_or_more_device_identifiers -> identifier , one_or_more_device_identifiers

@@ -104,6 +104,7 @@ data Expression =
   | MinusSign Expression
   | Negate Expression
   | LiteralExpression Literal
+  | IdentifierExpression String
   | Field DeviceName AttributeName
   | Timer TimerName
   | PredicateExpression Predicate

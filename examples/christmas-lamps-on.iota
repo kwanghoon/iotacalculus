@@ -2,7 +2,8 @@ rules "Christmas lamps on"
   device livingroom : socket ; // not a standard capability
   device floor : socket ; // not a standard capability
 
-  input clock : time ; 
+  device clock : time ;  // clock.hour
+  
   input state_auto_christmas : boolean ;
   input state_sleeping : switch ;
   

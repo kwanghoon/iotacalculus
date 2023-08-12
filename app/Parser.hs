@@ -302,10 +302,20 @@ parserSpec = ParserSpec
       rule "PrimaryExpr -> string_literal"       -- extension
         ( \rhs -> let str = getText rhs $1
 	          in  return $ toASTExpression $ LiteralExpression $ StringLiteral $ str ),
-      
-      rule "PrimaryExpr -> FieldOrTimer"
-        ( \rhs -> return $ get rhs 1 ),
-      
+
+      -------------------------------------------------------------------------------------
+      -- Note: It could be a constant, a timer, or an input variable (identifier).
+      --       A typechecker could discern it.
+      --       In the parser, it pretends to be an identifier.
+      -------------------------------------------------------------------------------------
+      rule "PrimaryExpr -> identifier"  
+        ( \rhs -> return $ toASTExpression $ IdentifierExpression $ getText rhs 1 ),
+
+      rule "PrimaryExpr -> identifier . identifier"
+        ( \rhs -> let device = getText rhs 1
+	              field = getText rhs 3
+		  in  return $ toASTExpression $ Field device field ),
+
       rule "PrimaryExpr -> ( Predicate )"
         ( \rhs -> let pred = fromASTPredicate $ get rhs 2
 	          in  return $ toASTExpression $ PredicateExpression $ pred ),
