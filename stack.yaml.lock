@@ -11,6 +11,13 @@ packages:
       size: 1248
   original:
     hackage: hashable-1.4.2.0@sha256:585792335d5541dba78fa8dfcb291a89cd5812a281825ff7a44afa296ab5d58a,4520
+- completed:
+    hackage: prettyprinter-1.7.0@sha256:6a9569e21fa61163a7f066d23d701e23e917893e8f39733d6e617ec72787ae5f,6007
+    pantry-tree:
+      sha256: d22f820a1f63497f7fd7e1f04b7d356d92de35582258f6ad55428c88b09e63ff
+      size: 3194
+  original:
+    hackage: prettyprinter-1.7.0@sha256:6a9569e21fa61163a7f066d23d701e23e917893e8f39733d6e617ec72787ae5f,6007
 snapshots:
 - completed:
     sha256: 2e7d4a730d8eb5373b2d383fac84efcf7c81e3b7a5fce71b4c2e19a1768f25a6

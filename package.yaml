@@ -25,6 +25,9 @@ dependencies:
 - regex-tdfa
 - hspec
 - containers
+- json           >= 0.10 && < 0.11
+- prettyprinter  >= 1.6.2 && <= 1.7.0
+- pretty         >= 1.1.3 && < 1.2
 
 ghc-options:
 - -Wall

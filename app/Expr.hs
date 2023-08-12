@@ -1,7 +1,18 @@
+{-# LANGUAGE DeriveDataTypeable, DeriveGeneric #-}
+
 module Expr where
 
+import Data.Char
+import Data.List (lookup)
+import Data.Text.Prettyprint.Doc hiding (Pretty)
+import Data.Text.Prettyprint.Doc.Util
+
+import Text.JSON.Generic
+
+
+--
 data Expr = NoExpr
-  deriving Show
+  deriving (Show, Typeable, Data)
 
 type Description = String
 
@@ -20,6 +31,7 @@ type ValueType = String
 data Rule =
     NodeRule Description Decls Rules
   | LeafRule Description Decls EMCA
+  deriving (Show, Typeable, Data)
 
 type Rules = [ Rule ]
 
@@ -27,22 +39,25 @@ data Decl =
     DeviceDecl Name Capability
   | InputDecl Name ValueType
   | OutputDecl Name [ ValueType ]
+  deriving (Show, Typeable, Data)
 
 type Decls = [ Decl ]
 
 data EMCA = 
     EMCA EventHandler MultiplePredicateActions
+  deriving (Show, Typeable, Data)
 
 type BoundVariable = String
 
 type EventConstant = String
 
 data EventHandler =
-    JustEvent                                      -- [ . ~> ]
-  | EventTo EventConstant                          -- [ . ~> Constant ]
-  | EventFrom EventConstant                        -- [ Constant ~> ]
-  | Event EventConstant EventConstant                 -- [ Constant ~> Constant' ]
-  | GroupEvent Group BoundVariable EventHandler    -- any group ( x -> predicate )
+    JustEvent FieldOrTimer                          -- fOrM [ . ~> ]
+  | EventTo FieldOrTimer EventConstant              -- fOrM [ . ~> Constant ]
+  | EventFrom FieldOrTimer EventConstant            -- fOrM [ Constant ~> ]
+  | Event FieldOrTimer EventConstant EventConstant  -- fOrM [ Constant ~> Constant' ]
+  | GroupEvent Group BoundVariable EventHandler     -- any group ( x -> predicate )
+  deriving (Show, Typeable, Data)
 
 type MultiplePredicateActions = [ ( Predicate, Actions ) ]
 
@@ -51,14 +66,14 @@ data Predicate =
   | Exists Group BoundVariable Predicate
   | LogicalOr Predicate Predicate
   | LogicalAnd Predicate Predicate
-  | IsEqual Expression Expression
-  | IsInequal Expression Expression
-  | Negate Predicate
-  | LessThan Expression Expression
-  | LessThanOrEqal Expression Expression
-  | GreaterThan Expression Expression
-  | GreaterThanOrEqualTo Expression Expression
+  | IsEqual Predicate Predicate  -- may look strange
+  | IsInequal Predicate Predicate  -- may look strange
+  | LessThan Predicate Expression -- may look strange
+  | LessThanOrEqualTo Predicate Expression -- may look strange
+  | GreaterThan Predicate Expression -- may look strange
+  | GreaterThanOrEqualTo Predicate Expression -- may look strange
   | ExpressionPredicate Expression
+  deriving (Show, Typeable, Data)
 
 data Expression =
     Addition Expression Expression
@@ -66,14 +81,19 @@ data Expression =
   | Multiplication Expression Expression
   | Division Expression Expression
   | MinusSign Expression
+  | Negate Expression
   | LiteralExpression Literal
   | Field DeviceName AttributeName
   | Timer TimerName
+  | PredicateExpression Predicate
+  deriving (Show, Typeable, Data)
 
 data Literal =
     BoolLiteral Bool
   | NumberLiteral Integer
   | StringLiteral String
+  | ConstantLiteral String
+  deriving (Show, Typeable, Data)
 
 type Actions = [ Action ]
 
@@ -82,10 +102,11 @@ type FieldOrTimer = Expression  --   Field DeviceName AttributeName
 
 data Action =
     CommandAction FieldOrTimer Expression
-  | OutputAction FieldOrTimer
+  | OutputAction Name [ Expression ]
   | StartTimer TimerName Expression
   | StopTimer TimerName
   | MapAction Group BoundVariable Action
+  deriving (Show, Typeable, Data)
 
 type Group = [ DeviceName ]
 

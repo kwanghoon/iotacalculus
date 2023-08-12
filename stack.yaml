@@ -43,6 +43,7 @@ packages:
 extra-deps:
 - ../yapb
 - hashable-1.4.2.0@sha256:585792335d5541dba78fa8dfcb291a89cd5812a281825ff7a44afa296ab5d58a,4520
+- prettyprinter-1.7.0@sha256:6a9569e21fa61163a7f066d23d701e23e917893e8f39733d6e617ec72787ae5f,6007
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

@@ -2,6 +2,7 @@ module Main (main) where
 
 import CommonParserUtil
 
+import AST
 import Lexer
 import Parser
 
@@ -34,7 +35,7 @@ doProcess verbose fileName = do
   -- (_,_,terminalList) <- lexingWithLineColumn lexerSpec 1 1 text
   -- when (verbose) $ mapM_ putStrLn $ map terminalToString terminalList
   when (verbose) $ putStrLn "Parsing..."
-  _ <- parsing False parserSpec ((),1,1,text)
+  astRule <- parsing False parserSpec ((),1,1,text)
             (aLexer lexerSpec) (fromToken (endOfToken lexerSpec))
-  -- when (verbose) $ putStrLn (show expr)
+  when (verbose) $ putStrLn (show (fromASTRule astRule))
   when (verbose) $ putStrLn "Done."
