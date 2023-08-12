@@ -2,6 +2,7 @@
 
 module Expr where
 
+import Data.Aeson
 import Data.Char
 import Data.List (lookup)
 import Data.Text.Prettyprint.Doc hiding (Pretty)
@@ -9,11 +10,9 @@ import Data.Text.Prettyprint.Doc.Util
 
 import Text.JSON.Generic
 
+import GHC.Generics
 
 --
-data Expr = NoExpr
-  deriving (Show, Typeable, Data)
-
 type Description = String
 
 type Name = String
@@ -31,7 +30,10 @@ type ValueType = String
 data Rule =
     NodeRule Description Decls Rules
   | LeafRule Description Decls EMCA
-  deriving (Show, Typeable, Data)
+  deriving (Show, Typeable, Data, Generic)
+
+instance FromJSON Rule
+instance ToJSON Rule
 
 type Rules = [ Rule ]
 
@@ -39,13 +41,19 @@ data Decl =
     DeviceDecl Name Capability
   | InputDecl Name ValueType
   | OutputDecl Name [ ValueType ]
-  deriving (Show, Typeable, Data)
+  deriving (Show, Typeable, Data, Generic)
+
+instance FromJSON Decl
+instance ToJSON Decl
 
 type Decls = [ Decl ]
 
 data EMCA = 
     EMCA EventHandler MultiplePredicateActions
-  deriving (Show, Typeable, Data)
+  deriving (Show, Typeable, Data, Generic)
+
+instance FromJSON EMCA
+instance ToJSON EMCA
 
 type BoundVariable = String
 
@@ -57,7 +65,10 @@ data EventHandler =
   | EventFrom FieldOrTimer EventConstant            -- fOrM [ Constant ~> ]
   | Event FieldOrTimer EventConstant EventConstant  -- fOrM [ Constant ~> Constant' ]
   | GroupEvent Group BoundVariable EventHandler     -- any group ( x -> predicate )
-  deriving (Show, Typeable, Data)
+  deriving (Show, Typeable, Data, Generic)
+
+instance FromJSON EventHandler
+instance ToJSON EventHandler
 
 type MultiplePredicateActions = [ ( Predicate, Actions ) ]
 
@@ -73,7 +84,10 @@ data Predicate =
   | GreaterThan Predicate Expression -- may look strange
   | GreaterThanOrEqualTo Predicate Expression -- may look strange
   | ExpressionPredicate Expression
-  deriving (Show, Typeable, Data)
+  deriving (Show, Typeable, Data, Generic)
+
+instance FromJSON Predicate
+instance ToJSON Predicate
 
 data Expression =
     Addition Expression Expression
@@ -86,14 +100,20 @@ data Expression =
   | Field DeviceName AttributeName
   | Timer TimerName
   | PredicateExpression Predicate
-  deriving (Show, Typeable, Data)
+  deriving (Show, Typeable, Data, Generic)
+
+instance FromJSON Expression
+instance ToJSON Expression
 
 data Literal =
     BoolLiteral Bool
   | NumberLiteral Integer
   | StringLiteral String
   | ConstantLiteral String
-  deriving (Show, Typeable, Data)
+  deriving (Show, Typeable, Data, Generic)
+
+instance FromJSON Literal
+instance ToJSON Literal
 
 type Actions = [ Action ]
 
@@ -106,7 +126,10 @@ data Action =
   | StartTimer TimerName Expression
   | StopTimer TimerName
   | MapAction Group BoundVariable Action
-  deriving (Show, Typeable, Data)
+  deriving (Show, Typeable, Data, Generic)
+
+instance FromJSON Action
+instance ToJSON Action
 
 type Group = [ DeviceName ]
 
