@@ -3,16 +3,10 @@
 module Expr where
 
 import Data.Aeson
+import Data.Aeson.Key (fromString)
 import Data.Aeson.Encode.Pretty (encodePretty)
-import Data.Char
-import Data.List (lookup)
-import Data.Text.Prettyprint.Doc hiding (Pretty)
-import Data.Text.Prettyprint.Doc.Util
 
-import Text.JSON.Generic
-
-import GHC.Generics
-
+import GHC.Generics ( Generic )
 import qualified Data.ByteString.Lazy.Char8 as B
 
 
@@ -40,7 +34,10 @@ data Rule =
   deriving (Show, Generic)
 
 instance FromJSON Rule
-instance ToJSON Rule
+
+instance ToJSON Rule where
+  toJSON (NodeRule d ds rs) = object [fromString "NodeRule" .= (d, ds, rs)]
+  toJSON (LeafRule d ds e) = object [fromString "LeafRule" .= (d, ds, e)]
 
 type Rules = [ Rule ]
 
@@ -51,7 +48,11 @@ data Decl =
   deriving (Show, Generic)
 
 instance FromJSON Decl
-instance ToJSON Decl
+
+instance ToJSON Decl where
+  toJSON (DeviceDecl n c) = object [fromString "DeviceDecl" .= (n, c)]
+  toJSON (InputDecl n vt) = object [fromString "InputDecl" .= (n, vt)]
+  toJSON (OutputDecl n vts) = object [fromString "OutputDecl" .= (n, vts)]
 
 type Decls = [ Decl ]
 
@@ -60,7 +61,9 @@ data EMCA =
   deriving (Show, Generic)
 
 instance FromJSON EMCA
-instance ToJSON EMCA
+
+instance ToJSON EMCA where
+  toJSON (EMCA e mpa) = object [fromString "EMCA" .= (e, mpa)]
 
 type BoundVariable = String
 
@@ -75,7 +78,13 @@ data EventHandler =
   deriving (Show, Generic)
 
 instance FromJSON EventHandler
-instance ToJSON EventHandler
+
+instance ToJSON EventHandler where
+  toJSON (JustEvent f) = object [fromString "JustEvent" .= f]
+  toJSON (EventTo f c) = object [fromString "EventTo" .= (f, c)]
+  toJSON (EventFrom f c) = object [fromString "EventFrom" .= (f, c)]
+  toJSON (Event f c c') = object [fromString "Event" .= (f, c, c')]
+  toJSON (GroupEvent g b e) = object [fromString "GroupEvent" .= (g, b, e)]
 
 type MultiplePredicateActions = [ ( Predicate, Actions ) ]
 
@@ -94,7 +103,19 @@ data Predicate =
   deriving (Show, Generic)
 
 instance FromJSON Predicate
-instance ToJSON Predicate
+
+instance ToJSON Predicate where
+  toJSON (Forall g b p) = object [fromString "Forall" .= (g, b, p)]
+  toJSON (Exists g b p) = object [fromString "Exists" .= (g, b, p)]
+  toJSON (LogicalOr p1 p2) = object [fromString "LogicalOr" .= (p1, p2)]
+  toJSON (LogicalAnd p1 p2) = object [fromString "LogicalAnd" .= (p1, p2)]
+  toJSON (IsEqual p1 p2) = object [fromString "IsEqual" .= (p1, p2)]
+  toJSON (IsInequal p1 p2) = object [fromString "IsInequal" .= (p1, p2)]
+  toJSON (LessThan p e) = object [fromString "LessThan" .= (p, e)]
+  toJSON (LessThanOrEqualTo p e) = object [fromString "LessThanOrEqualTo" .= (p, e)]
+  toJSON (GreaterThan p e) = object [fromString "GreaterThan" .=(p, e)]
+  toJSON (GreaterThanOrEqualTo p e) = object [fromString "GreaterThanOrEqualTo" .= (p, e)]
+  toJSON (ExpressionPredicate e) = object [fromString "ExpressionPredicate" .= e]
 
 data Expression =
     Addition Expression Expression
@@ -111,7 +132,19 @@ data Expression =
   deriving (Show, Generic)
 
 instance FromJSON Expression
-instance ToJSON Expression
+
+instance ToJSON Expression where
+  toJSON (Addition e1 e2) = object [fromString "Addition" .= (e1, e2)]
+  toJSON (Subtraction e1 e2) = object [fromString "Subtraction" .= (e1, e2)]
+  toJSON (Multiplication e1 e2) = object [fromString "Multiplication" .= (e1, e2)]
+  toJSON (Division e1 e2) = object [fromString "Division" .= (e1, e2)]
+  toJSON (MinusSign e) = object [fromString "MinusSign" .= e]
+  toJSON (Negate e) = object [fromString "Negate" .= e]
+  toJSON (LiteralExpression l) = object [fromString "LiteralExpression" .= l]
+  toJSON (IdentifierExpression s) = object [fromString "IdentifierExpression" .= s]
+  toJSON (Field d a) = object [fromString "Field" .= (d, a)]
+  toJSON (Timer t) = object [fromString "Timer" .= t]
+  toJSON (PredicateExpression p) = object [fromString "PredicateExpression" .= p]
 
 data Literal =
     BoolLiteral Bool
@@ -121,7 +154,12 @@ data Literal =
   deriving (Show, Generic)
 
 instance FromJSON Literal
-instance ToJSON Literal
+
+instance ToJSON Literal where
+  toJSON (BoolLiteral b) = object [fromString "BoolLiteral" .= b]
+  toJSON (NumberLiteral n) = object [fromString "NumberLiteral" .= n]
+  toJSON (StringLiteral s) = object [fromString "StringLiteral" .= s]
+  toJSON (ConstantLiteral c) = object [fromString "ConstantLiteral" .= c]
 
 type Actions = [ Action ]
 
@@ -137,7 +175,13 @@ data Action =
   deriving (Show, Generic)
 
 instance FromJSON Action
-instance ToJSON Action
+
+instance ToJSON Action where
+  toJSON (CommandAction f e) = object [fromString "CommandAction" .= (f, e)]
+  toJSON (OutputAction n es) = object [fromString "OutputAction" .= (n, es)]
+  toJSON (StartTimer t e) = object [fromString "StartTimer" .= (t, e)]
+  toJSON (StopTimer t) = object [fromString "StopTimer" .= t]
+  toJSON (MapAction g b a) = object [fromString "MapAction" .= (g, b, a)]
 
 type Group = [ DeviceName ]
 

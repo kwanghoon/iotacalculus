@@ -61,7 +61,7 @@ executables:
 tests:
   iotacalculus-test:
     main:                Spec.hs
-    source-dirs:         test
+    source-dirs:         test, app
     ghc-options:
     - -threaded
     - -rtsopts
