@@ -25,11 +25,18 @@ source-repository head
 
 library
   exposed-modules:
-      Lib
+      AST
+      Expr
+      Interp
+      Lexer
+      Main
+      Parser
+      Run
+      Token
   other-modules:
       Paths_iotacalculus
   hs-source-dirs:
-      src
+      app
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       aeson
@@ -51,6 +58,7 @@ executable iotacalculus-exe
   other-modules:
       AST
       Expr
+      Interp
       Lexer
       Parser
       Run
@@ -81,7 +89,7 @@ test-suite iotacalculus-test
   other-modules:
       Paths_iotacalculus
   hs-source-dirs:
-      test, app
+      test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aeson

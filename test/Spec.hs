@@ -18,7 +18,7 @@ iotaFiles =
     ]
 
 iotaDir :: String
-iotaDir = ".\\examples\\"
+iotaDir = "./examples/"
 
 main :: IO ()
 main = _main (map (iotaDir ++) iotaFiles)

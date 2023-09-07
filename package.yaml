@@ -45,7 +45,7 @@ ghc-options:
 - -Wredundant-constraints
 
 library:
-  source-dirs: src
+  source-dirs: app
 
 executables:
   iotacalculus-exe:
@@ -61,7 +61,7 @@ executables:
 tests:
   iotacalculus-test:
     main:                Spec.hs
-    source-dirs:         test, app
+    source-dirs:         test
     ghc-options:
     - -threaded
     - -rtsopts

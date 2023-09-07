@@ -132,7 +132,7 @@ parserSpec = ParserSpec
         ( \rhs -> let fieldOrTimer = fromASTExpression (get rhs 1)
 	              constantFrom = fromASTConstant (get rhs 3)
 	              constantTo = fromASTConstant (get rhs 5)
-		  in  return $ toASTEventHandler $ Event fieldOrTimer constantFrom constantTo
+		  in  return $ toASTEventHandler $ EventFromTo fieldOrTimer constantFrom constantTo
 	),
       
       rule "EventHandler -> any Group ( identifier -> EventHandler )"

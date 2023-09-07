@@ -40,10 +40,10 @@ lexerSpec = LexerSpec
         ("\\&\\&", mkFn AND),
         ("==", mkFn EQUAL),
         ("!=", mkFn NOTEQUAL),
-        ("<", mkFn LESSTHAN),
         ("<=", mkFn LESSTHANOREQUAL),
-        (">", mkFn GREATERTHAN),
+        ("<", mkFn LESSTHAN),
         (">=", mkFn GREATERTHANOREQUAL),
+        (">", mkFn GREATERTHAN),
 
         ("\\|", mkFn BAR),
 

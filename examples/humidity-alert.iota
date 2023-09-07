@@ -1,0 +1,19 @@
+rule "humidity-alert.groovy"
+
+  device humiditySensor1 : relativeHumidityMeasurement;
+  input tooHumid : number;
+  input tooDry : number;
+  device switch1 : switch;
+  output send : string;
+
+  humiditySensor1.humidity [ .~>currentHumidity ];
+  
+    currntyHumidity >= tooHumid;
+    send ( "Sensed high humidity level: " + currentHumidity ),
+    switch1.switch := on
+
+  | currntyHumidity < tooDry;
+    send ( "Sensed low humidity level: " + currentHumidity ),
+    switch1.switch := off
+  
+end

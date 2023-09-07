@@ -73,7 +73,7 @@ data EventHandler =
     JustEvent FieldOrTimer                          -- fOrM [ . ~> ]
   | EventTo FieldOrTimer EventConstant              -- fOrM [ . ~> Constant ]
   | EventFrom FieldOrTimer EventConstant            -- fOrM [ Constant ~> ]
-  | Event FieldOrTimer EventConstant EventConstant  -- fOrM [ Constant ~> Constant' ]
+  | EventFromTo FieldOrTimer EventConstant EventConstant  -- fOrM [ Constant ~> Constant' ]
   | GroupEvent Group BoundVariable EventHandler     -- any group ( x -> predicate )
   deriving (Show, Generic)
 
@@ -83,7 +83,7 @@ instance ToJSON EventHandler where
   toJSON (JustEvent f) = object [fromString "JustEvent" .= f]
   toJSON (EventTo f c) = object [fromString "EventTo" .= (f, c)]
   toJSON (EventFrom f c) = object [fromString "EventFrom" .= (f, c)]
-  toJSON (Event f c c') = object [fromString "Event" .= (f, c, c')]
+  toJSON (EventFromTo f c c') = object [fromString "EventFromTo" .= (f, c, c')]
   toJSON (GroupEvent g b e) = object [fromString "GroupEvent" .= (g, b, e)]
 
 type MultiplePredicateActions = [ ( Predicate, Actions ) ]
