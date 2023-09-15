@@ -6,6 +6,7 @@
  - 
     ```
      $ git clone https://github.com/kwanghoon/iotacalculus
+     $ git clone https://github.com/kwanghoon/yapb
      $ cd iotacalculus
      $ stack build
      $ stack exec -- iotacalculus-exe ./examples/turn-on-siren-when-no-one-is-present.iota 
