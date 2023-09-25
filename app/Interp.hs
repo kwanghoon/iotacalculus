@@ -33,7 +33,7 @@ data EvalState =
  | PredES  Ruleset Ruleset  -- (In, Out)
  | ActES   Ruleset Ruleset  -- (In, Out)
 
-
+{-
 -- | (R-E)
 
 evalREvent :: Set.Set Event -> Set.Set State -> Ruleset ->
@@ -245,3 +245,4 @@ chooseOne list =
  where
    f [e] prev        = [ (e, prev) ]
    f (e1:e2:es) prev = (e1, e2:es++prev) : f (e2:es) (e1:prev)
+-}
