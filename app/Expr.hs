@@ -161,6 +161,13 @@ instance ToJSON Literal where
   toJSON (StringLiteral s) = object [fromString "StringLiteral" .= s]
   toJSON (ConstantLiteral c) = object [fromString "ConstantLiteral" .= c]
 
+data Value =  -- | Runtime value
+    BoolValue Bool
+  | NumberValue Integer
+  | StringValue String
+  | ConstantValue String
+  deriving (Show, Generic)
+
 type Actions = [ Action ]
 
 type FieldOrTimer = Expression  --   Field DeviceName AttributeName 
