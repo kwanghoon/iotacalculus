@@ -12,7 +12,7 @@ data Event =
   | EventTimer TimerName EventConstant EventConstant
   deriving (Eq, Ord)
 
-data State = State
+data State = Map Name Literal
 
 -- | Environments
 type Environment = Map.Map Name DeclValue
@@ -24,6 +24,9 @@ data DeclValue =
 
 type RuleClosure = (Environment, EMCA)
 
+eventHandler :: RuleClosure -> EventHandler
+eventHandler (_, emca) = Expr.eventHandler emca
+
 -- | Rule sets
 type Ruleset = Map.Map Integer RuleClosure
 
@@ -33,7 +36,7 @@ data EvalState =
  | PredES  Ruleset Ruleset  -- (In, Out)
  | ActES   Ruleset Ruleset  -- (In, Out)
 
-{-
+
 -- | (R-E)
 
 evalREvent :: Set.Set Event -> Set.Set State -> Ruleset ->
@@ -41,17 +44,21 @@ evalREvent :: Set.Set Event -> Set.Set State -> Ruleset ->
 
 -- | NoneES ruleset
 evalREvent eventSet stateSet ruleset
- | Map.null ruleset = return (Maybe.Nothing, eventSet, stateSet, NoneES ruleset)
+ | Map.null ruleset = 
+    return (Maybe.Nothing, eventSet, stateSet, NoneES ruleset)
+
  | otherwise =
-     do eEsList <- chooseOne (Set.toList eventSet)
-        let (e, esList) = head eEsList -- Just pick the first one!
-        let es = Set.fromList esList
-        return (Maybe.Just e, es, stateSet, EventES ruleset Map.empty)
+    do eEsList <- chooseOne (Set.toList eventSet)
+       let (e, esList) = head eEsList -- Just pick the first one!
+       let es = Set.fromList esList
+       return (Maybe.Just e, es, stateSet, EventES ruleset Map.empty)
 
 
 -- | (R-HP) and (R-H) with EventES rulesetIn rulsetOut
 
-evalRHandleEvent :: Event -> b -> c -> Ruleset -> Ruleset -> IO (Event, b, c, EvalState)
+evalRHandleEvent 
+  :: Event -> Set.Set Event -> Set.Set State -> Ruleset -> Ruleset 
+      -> IO (Event, Set.Set Event, Set.Set State, EvalState)
 evalRHandleEvent event eventSet stateSet rulesetIn rulesetOut
 
  | Map.null rulesetIn =
@@ -61,12 +68,14 @@ evalRHandleEvent event eventSet stateSet rulesetIn rulesetOut
      do rRsList <- chooseOne (Map.assocs rulesetIn)
         let ((idx,r), rsList) = head rRsList -- Just pick the first one!
         let rs1 = Map.fromList rsList
-        rs <- handleRule idx r event
+        rs <- handleRule idx r (eventHandler r) event
         return (event, eventSet, stateSet, EventES rs1 (Map.union rs rulesetOut))
 
 -- | (R-P) and (R-PA) with PredES rulesetIn rulesetOut
 
-evalRPredicate :: a -> b -> State -> Map.Map Integer RuleClosure -> Ruleset -> IO (a, b, State, EvalState)
+evalRPredicate 
+  :: Event -> Set.Set Event -> Set.Set State -> Map.Map Integer RuleClosure -> Ruleset 
+      -> IO (Event, Set.Set Evnet, State, EvalState)
 evalRPredicate event eventSet stateSet rulesetIn rulesetOut
 
   | Map.null rulesetIn =
@@ -81,7 +90,9 @@ evalRPredicate event eventSet stateSet rulesetIn rulesetOut
 
 -- | (R-A) and (R-AE) with PredES rulesetIn rulesetOut
 
-evalRAction :: a -> Set.Set Event -> State -> Map.Map Integer RuleClosure -> Ruleset -> IO (Maybe a, Set.Set Event, State, EvalState)
+evalRAction 
+  :: Event -> Set.Set Event -> State -> Map.Map Integer RuleClosure -> Ruleset 
+      -> IO (Maybe a, Set.Set Event, State, EvalState)
 evalRAction event eventSet stateSet rulesetIn rulesetOut
 
    | Map.null rulesetIn =
@@ -98,69 +109,66 @@ evalRAction event eventSet stateSet rulesetIn rulesetOut
 
 
 -- | [[ r ]]_h e = rs
-handleRule :: Integer -> RuleClosure -> Event -> IO Ruleset
+-- |   Note that the 3rd argument is one extracted from the 2nd argument.
+handleRule :: Integer -> RuleClosure -> EventHandler -> Event -> IO Ruleset
 
--- JustEvent
-handleRule idx rc@(_, EMCA (JustEvent (Field devName1 fieldName1)) _)
-                      (EventField devName2 fieldName2 _ _)
+-- for JustEvent
+handleRule idx rc (JustEvent (Field devName1 fieldName1)) 
+                  (EventField devName2 fieldName2 _ _)
   | devName1 == devName2 && fieldName1 == fieldName2
-    = return (Map.fromList [ (idx, rc)])
+    = return $ Map.fromList [ (idx, rc)]
   | otherwise = return Map.empty
 
-handleRule idx rc@(_, EMCA (JustEvent (Timer timerName)) _)
-                      (EventTimer timerName' _ _)
-  | timerName == timerName' = return (Map.fromList [ (idx, rc)])
+handleRule idx rc (JustEvent (Timer timerName)) 
+                  (EventTimer timerName' _ _)
+  | timerName == timerName' = return $ Map.fromList [ (idx, rc)]
   | otherwise = return Map.empty
 
-handleRule _ (_, EMCA (JustEvent _) _) _ = error "handleRule over JustEvent: not implemented"
-
--- EventTo
-handleRule idx rc@(_, EMCA (EventTo (Field devName1 fieldName1) eventConstant1) _)
-                          (EventField devName2 fieldName2 _ eventConstant2)
+-- for EventTo
+handleRule idx rc (EventTo (Field devName1 fieldName1) eventConstant1)
+                  (EventField devName2 fieldName2 _ eventConstant2)
   | devName1 == devName2 && fieldName1 == fieldName2 && eventConstant1 == eventConstant2
-    = return (Map.fromList [ (idx, rc)])
+    = return $ Map.fromList [ (idx, rc)]
   | otherwise = return Map.empty
 
-handleRule idx rc@(_, EMCA (EventTo (Timer timerName1) eventConstant1) _)
-                          (EventTimer timerName2 _ eventConstant2)
+handleRule idx rc (EventTo (Timer timerName1) eventConstant1)
+                  (EventTimer timerName2 _ eventConstant2)
   | timerName1 == timerName2 && eventConstant1 == eventConstant2
-    = return (Map.fromList [ (idx, rc)])
+    = return $ Map.fromList [ (idx, rc)]
   | otherwise = return Map.empty
 
-handleRule _ (_, EMCA (EventTo _ _) _) _ = error "handleRule over EventTo: not implemented"
-
--- EventFrom
-handleRule idx rc@(_, EMCA (EventFrom (Field devName1 fieldName1) eventConstant1) _)
-                          (EventField devName2 fieldName2 eventConstant2 _)
+-- for EventFrom
+handleRule idx rc (EventFrom (Field devName1 fieldName1) eventConstant1)
+                  (EventField devName2 fieldName2 eventConstant2 _)
   | devName1 == devName2 && fieldName1 == fieldName2 && eventConstant1 == eventConstant2
-    = return (Map.fromList [ (idx, rc)])
+    = return $ Map.fromList [ (idx, rc)]
   | otherwise = return Map.empty
 
-handleRule idx rc@(_, EMCA (EventFrom (Timer timerName1) eventConstant1) _)
-                          (EventTimer timerName2 eventConstant2 _)
+handleRule idx rc (EventFrom (Timer timerName1) eventConstant1)
+                  (EventTimer timerName2 eventConstant2 _)
   | timerName1 == timerName2 && eventConstant1 == eventConstant2
-    = return (Map.fromList [ (idx, rc)])
+    = return $ Map.fromList [ (idx, rc)]
   | otherwise = return Map.empty
 
-handleRule _ (_, EMCA (EventFrom _ _) _) _ = error "handleRule over EventFrom: not implemented"
-
--- EventFromTo
-handleRule idx rc@(_, EMCA (EventFromTo (Field devName1 fieldName1) eventConstant1 eventConstant1') _)
-                          (EventField devName2 fieldName2 eventConstant2 eventConstant2')
-  | devName1 == devName2 && fieldName1 == fieldName2 && eventConstant1 == eventConstant2 && eventConstant1' == eventConstant2'
-    = return (Map.fromList [ (idx, rc)])
+-- for EventFromTo
+handleRule idx rc (EventFromTo (Field devName1 fieldName1) eventConstant1 eventConstant1')
+                  (EventField devName2 fieldName2 eventConstant2 eventConstant2')
+  | devName1 == devName2 && fieldName1 == fieldName2 
+    && eventConstant1 == eventConstant2 && eventConstant1' == eventConstant2'
+    = return $ Map.fromList [ (idx, rc)]
   | otherwise = return Map.empty
 
-handleRule idx rc@(_, EMCA (EventFromTo (Timer timerName1) eventConstant1 eventConstant1') _)
-                          (EventTimer timerName2 eventConstant2 eventConstant2')
-  | timerName1 == timerName2 && eventConstant1 == eventConstant2 && eventConstant1' == eventConstant2'
-    = return (Map.fromList [ (idx, rc)])
+handleRule idx rc (EventFromTo (Timer timerName1) eventConstant1 eventConstant1')
+                  (EventTimer timerName2 eventConstant2 eventConstant2')
+  | timerName1 == timerName2 && eventConstant1 == eventConstant2 
+    && eventConstant1' == eventConstant2'
+    = return $ Map.fromList [ (idx, rc)]
   | otherwise = return Map.empty
 
-handleRule _ (_, EMCA (EventFromTo {}) _) _ = error "handleRule over EventFromTo: not implemented"
+-- forGroupEvent
+handleRule _ (_, EMCA (GroupEvent {}) _) _ _ = error "handleRule over GroupEvent: not implemented"
 
--- GroupEvent
-handleRule _ (_, EMCA (GroupEvent {}) _) _ = error "handleRule over GroupEvent: not implemented"
+handleRule _ _ evH event = error $ "handleRule: " ++ show evH ++ " over " ++ show event
 
 
 -- | [[ r ]]_p sigma = rs
@@ -245,4 +253,5 @@ chooseOne list =
  where
    f [e] prev        = [ (e, prev) ]
    f (e1:e2:es) prev = (e1, e2:es++prev) : f (e2:es) (e1:prev)
--}
+
+

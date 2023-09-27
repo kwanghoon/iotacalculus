@@ -27,6 +27,7 @@ library
   exposed-modules:
       AST
       Expr
+      Interp
       Lexer
       Main
       Parser
@@ -57,6 +58,7 @@ executable iotacalculus-exe
   other-modules:
       AST
       Expr
+      Interp
       Lexer
       Parser
       Run

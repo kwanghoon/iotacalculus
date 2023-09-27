@@ -60,6 +60,8 @@ data EMCA =
     EMCA EventHandler MultiplePredicateActions
   deriving (Show, Generic)
 
+eventHandler (EMCA evH _) = evH  
+
 instance FromJSON EMCA
 
 instance ToJSON EMCA where
