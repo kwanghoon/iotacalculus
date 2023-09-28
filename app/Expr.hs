@@ -58,7 +58,7 @@ type Decls = [ Decl ]
 
 data EMCA = 
     EMCA EventHandler MultiplePredicateActions
-  deriving (Show, Generic)
+  deriving (Show, Generic, Ord, Eq)
 
 eventHandler (EMCA evH _) = evH  
 
@@ -77,7 +77,7 @@ data EventHandler =
   | EventFrom FieldOrTimer EventConstant            -- fOrM [ Constant ~> ]
   | EventFromTo FieldOrTimer EventConstant EventConstant  -- fOrM [ Constant ~> Constant' ]
   | GroupEvent Group BoundVariable EventHandler     -- any group ( x -> predicate )
-  deriving (Show, Generic)
+  deriving (Show, Generic, Ord, Eq)
 
 instance FromJSON EventHandler
 
@@ -102,7 +102,7 @@ data Predicate =
   | GreaterThan Predicate Expression -- may look strange
   | GreaterThanOrEqualTo Predicate Expression -- may look strange
   | ExpressionPredicate Expression
-  deriving (Show, Generic)
+  deriving (Show, Generic, Ord, Eq)
 
 instance FromJSON Predicate
 
@@ -131,7 +131,7 @@ data Expression =
   | Field DeviceName AttributeName
   | Timer TimerName
   | PredicateExpression Predicate
-  deriving (Show, Generic)
+  deriving (Show, Generic, Ord, Eq)
 
 instance FromJSON Expression
 
@@ -153,7 +153,7 @@ data Literal =
   | NumberLiteral Integer
   | StringLiteral String
   | ConstantLiteral String
-  deriving (Show, Generic)
+  deriving (Show, Generic, Ord, Eq)
 
 instance FromJSON Literal
 
@@ -163,12 +163,16 @@ instance ToJSON Literal where
   toJSON (StringLiteral s) = object [fromString "StringLiteral" .= s]
   toJSON (ConstantLiteral c) = object [fromString "ConstantLiteral" .= c]
 
-data Value =  -- | Runtime value
-    BoolValue Bool
-  | NumberValue Integer
-  | StringValue String
-  | ConstantValue String
-  deriving (Show, Generic)
+isTrueLiteral :: Literal -> Bool
+isTrueLiteral (BoolLiteral True) = True
+isTrueLiteral _ = False
+
+-- data Value =  -- | Runtime value
+--     BoolValue Bool
+--   | NumberValue Integer
+--   | StringValue String
+--   | ConstantValue String
+--   deriving (Show, Generic)
 
 type Actions = [ Action ]
 
@@ -181,7 +185,7 @@ data Action =
   | StartTimer TimerName Expression
   | StopTimer TimerName
   | MapAction Group BoundVariable Action
-  deriving (Show, Generic)
+  deriving (Show, Generic, Ord, Eq)
 
 instance FromJSON Action
 
