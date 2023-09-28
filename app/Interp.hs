@@ -6,6 +6,7 @@ import qualified Data.Maybe as Maybe
 
 import Expr
 import Data.Functor.Contravariant (Predicate(Predicate))
+import Data.ByteString (index)
 
 data Event =
     EventField DeviceName AttributeName EventConstant EventConstant
@@ -30,83 +31,81 @@ eventHandler (_, emca) = Expr.eventHandler emca
 -- | Rule sets
 type Ruleset = Map.Map Integer RuleClosure
 
+type IndexedRuleClosure = (Integer, RuleClosure) -- (index, rule closure)
+
 data EvalState =
-   NoneES  Ruleset
- | EventES Ruleset Ruleset  -- (In, Out)
- | PredES  Ruleset Ruleset  -- (In, Out)
- | ActES   Ruleset Ruleset  -- (In, Out)
+   NoneEvalState  Ruleset
+ | EventEvalState Ruleset Ruleset  -- (In, Out)
+ | PredEvalState  Ruleset Ruleset  -- (In, Out)
+ | ActEvalState   Ruleset Ruleset  -- (In, Out)
 
-{-
-
--- | (R-E)
+------------------------------------------------------------------------------------------
+-- | (R-E) rule event
+------------------------------------------------------------------------------------------
 
 evalREvent :: Set.Set Event -> Set.Set State -> Ruleset ->
  IO (Maybe.Maybe Event, Set.Set Event, Set.Set State, EvalState)
 
--- | NoneES ruleset
 evalREvent eventSet stateSet ruleset
- | Map.null ruleset = 
-    return (Maybe.Nothing, eventSet, stateSet, NoneES ruleset)
+ | Set.null eventSet = 
+    return (Maybe.Nothing, eventSet, stateSet, NoneEvalState ruleset)
 
  | otherwise =
-    do eEsList <- chooseOne (Set.toList eventSet)
-       let (e, esList) = head eEsList -- Just pick the first one!
-       let es = Set.fromList esList
-       return (Maybe.Just e, es, stateSet, EventES ruleset Map.empty)
+    do (e, es) <- revDisjointUnion eventSet    -- eventSet = { e } U es
+       return (Maybe.Just e, es, stateSet, EventEvalState ruleset Map.empty)
 
-
--- | (R-HP) and (R-H) with EventES rulesetIn rulsetOut
+------------------------------------------------------------------------------------------
+-- | (R-H) and (R-HP) with EventEvalState rulesetIn rulsetOut
+------------------------------------------------------------------------------------------
 
 evalRHandleEvent 
-  :: Event -> Set.Set Event -> Set.Set State -> Ruleset -> Ruleset 
-      -> IO (Event, Set.Set Event, Set.Set State, EvalState)
+  :: Event -> Set.Set Event -> State -> Ruleset -> Ruleset 
+      -> IO (Event, Set.Set Event, State, EvalState)
 evalRHandleEvent event eventSet stateSet rulesetIn rulesetOut
 
  | Map.null rulesetIn =
-     return (event, eventSet, stateSet, PredES rulesetOut Map.empty)
+     return (event, eventSet, stateSet, PredEvalState rulesetOut Map.empty)
 
  | otherwise =
-     do rRsList <- chooseOne (Map.assocs rulesetIn)
-        let ((idx,r), rsList) = head rRsList -- Just pick the first one!
-        let rs1 = Map.fromList rsList
-        rs <- handleRule idx r (eventHandler r) event
-        return (event, eventSet, stateSet, EventES rs1 (Map.union rs rulesetOut))
+     do (indexedRule, rs1) <- revDisjointUnionMap rulesetIn
+        let (idx, rule) = indexedRule
+        rs <- handleRule idx rule (Interp.eventHandler rule) event
+        return (event, eventSet, stateSet, EventEvalState rs1 (Map.union rs rulesetOut))
 
 -- | (R-P) and (R-PA) with PredES rulesetIn rulesetOut
 
 evalRPredicate 
-  :: Event -> Set.Set Event -> Set.Set State -> Map.Map Integer RuleClosure -> Ruleset 
-      -> IO (Event, Set.Set Evnet, State, EvalState)
+  :: Event -> Set.Set Event -> State -> Map.Map Integer RuleClosure -> Ruleset 
+      -> IO (Event, Set.Set Event, State, EvalState)
 evalRPredicate event eventSet stateSet rulesetIn rulesetOut
 
   | Map.null rulesetIn =
-      return (event, eventSet, stateSet, ActES rulesetOut Map.empty)
+      return (event, eventSet, stateSet, ActEvalState rulesetOut Map.empty)
 
   | otherwise =
-      do rRsList <- chooseOne (Map.assocs rulesetIn)
-         let ((idx,r), rsList) = head rRsList
-         let rs1 = Map.fromList rsList
-         rs <- evalPredicate idx r stateSet
-         return (event, eventSet, stateSet, PredES rs1 (Map.union rs rulesetOut))
+      do  (indexedRule, rs1) <- revDisjointUnionMap rulesetIn
+          let (idx, rule) = indexedRule
+          rs <- evalPredicate idx rule stateSet
+          return (event, eventSet, stateSet, PredEvalState rs1 (Map.union rs rulesetOut))
+
 
 -- | (R-A) and (R-AE) with PredES rulesetIn rulesetOut
 
 evalRAction 
   :: Event -> Set.Set Event -> State -> Map.Map Integer RuleClosure -> Ruleset 
-      -> IO (Maybe a, Set.Set Event, State, EvalState)
+      -> IO (Maybe Event, Set.Set Event, State, EvalState)
 evalRAction event eventSet stateSet rulesetIn rulesetOut
 
    | Map.null rulesetIn =
-       return (Maybe.Nothing, eventSet, stateSet, NoneES rulesetOut)
+       return (Maybe.Nothing, eventSet, stateSet, NoneEvalState rulesetOut)
 
    | otherwise =
-       do rRsList <- chooseOne (Map.assocs rulesetIn)
-          let ((i,r), rsList) = head rRsList
-          let rs0 = Map.fromList [(i,r)]
-          let rs1 = Map.fromList rsList
-          (stateSet', eventSet') <- evalAction r stateSet
-          return (Maybe.Just event, Set.union eventSet eventSet', stateSet',
-                                          ActES rs1 (Map.union rs0 rulesetOut))
+       do (indexedRule, rs1) <- revDisjointUnionMap rulesetIn
+          let (_, rule) = indexedRule
+          (stateSet', eventSet') <- evalAction rule stateSet
+          return (Maybe.Just event, 
+                    Set.union eventSet eventSet', stateSet', 
+                      ActEvalState rs1 (Map.union (Map.fromList [indexedRule]) rulesetOut))
 
 
 -- | [[ r ]]_h e = rs
@@ -244,16 +243,34 @@ evalAction = undefined
 
 -- | Utilities
 
--- Assume the list is not empty.
-chooseOne :: [a] -> IO [ (a, [a]) ]
-chooseOne list =
- case list of
-   []    -> error "chooseOne: the assumption is broken"
-   list' -> return $ f list' []
+-- Reverse of disjoint union for map
+--    * Assume the map is not empty.
+revDisjointUnionMap :: Map.Map k a -> IO ((k,a), Map.Map k a)
+revDisjointUnionMap map = 
+  do  let list = Map.assocs map
+      list' <- revDisjointUnionForList list
+      let (elm, list1) = head list' -- Just pick the first one!
+      return (elm, Map.fromList list1)
 
- where
-   f [e] prev        = [ (e, prev) ]
-   f (e1:e2:es) prev = (e1, e2:es++prev) : f (e2:es) (e1:prev)
+-- Reverse of disjoint union for set
+--    * Assume the set is not empty.
+revDisjointUnion :: Set.Set a -> IO (a, Set.Set a)
+revDisjointUnion set = 
+  do  list <- revDisjointUnionForList (Set.toList set)
+      let (elm, list1) = head list -- Just pick the first one!
+      return (elm, Set.fromList list1)
 
+-- revDisjointUnionForList [1, 2, 3]
+-- ==> [ (1, [2, 3]), (2, [1, 3]), (3, [1, 2]) ]
 
--}
+-- Reverse of disjoint union for set
+--    * Assume the list is not empty.
+revDisjointUnionForList :: [a] -> IO [ (a, [a]) ]
+revDisjointUnionForList list =
+  case list of
+    []    -> error "revDisjointUnion: the assumption is broken"
+    list' -> return $ f list' []
+
+  where
+    f [] _         = []
+    f (e:es) prev  = (e, prev ++ es) : f es (prev ++ [e])
