@@ -34,7 +34,7 @@ type Ruleset = Map.Map Integer RuleClosure
 type IndexedRuleClosure = (Integer, RuleClosure) -- (index, rule closure)
 
 data EvalState =
-   NoneEvalState  Ruleset
+   NoneEvalState  -- Note: Ruleset is remmoved from this state.
  | EventEvalState Ruleset Ruleset  -- (In, Out)
  | PredEvalState  Ruleset Ruleset  -- (In, Out)
  | ActEvalState   Ruleset Ruleset  -- (In, Out)
@@ -48,7 +48,7 @@ evalREvent :: Set.Set Event -> Set.Set State -> Ruleset ->
 
 evalREvent eventSet stateSet ruleset
  | Set.null eventSet = 
-    return (Maybe.Nothing, eventSet, stateSet, NoneEvalState ruleset)
+    return (Maybe.Nothing, eventSet, stateSet, NoneEvalState)
 
  | otherwise =
     do (e, es) <- revDisjointUnion eventSet    -- eventSet = { e } U es
@@ -92,6 +92,11 @@ evalRPredicate event eventSet stateSet rulesetIn rulesetOut
 
 ------------------------------------------------------------------------------------------
 -- | (R-A) and (R-AE) with PredES rulesetIn rulesetOut
+-- |
+-- |   Note that the emca in the rulesetIn has a single pair of a predicate and an action 
+-- |   that are found by evalRPredicate or evalPredicate. 
+-- |   The function evalPredicateion leaves only the matched pair and remove 
+-- |   all the unmatched pairs from the original emca.
 ------------------------------------------------------------------------------------------
 
 evalRAction 
@@ -100,12 +105,12 @@ evalRAction
 evalRAction event eventSet stateSet rulesetIn rulesetOut
 
    | Map.null rulesetIn =
-       return (Maybe.Nothing, eventSet, stateSet, NoneEvalState rulesetOut)
+       return (Maybe.Nothing, eventSet, stateSet, NoneEvalState) -- Note ruleset is removed from NoneEvalState.
 
    | otherwise =
        do (indexedRule, rs1) <- revDisjointUnionMap rulesetIn
-          let (_, rule) = indexedRule
-          (stateSet', eventSet') <- evalAction rule stateSet
+          let (idx, rule) = indexedRule
+          (stateSet', eventSet') <- evalActionFrom idx rule stateSet
           return (Maybe.Just event, 
                     Set.union eventSet eventSet', stateSet', 
                       ActEvalState rs1 (Map.union (Map.fromList [indexedRule]) rulesetOut))
@@ -180,6 +185,8 @@ evalEvent _ _ evH event = error $ "evalEvent: " ++ show evH ++ " over " ++ show 
 ------------------------------------------------------------------------------------------
 -- | evalPredicate:
 -- | [[ r ]]_p sigma = rs
+-- |
+-- |  Note that the returned rule set is the firstly matched E-C-A from the EMCA.
 ------------------------------------------------------------------------------------------
 evalPredicate :: Integer -> RuleClosure -> State -> IO Ruleset
 evalPredicate idx (env, EMCA eh mpas) state = 
@@ -189,8 +196,10 @@ evalPredicate idx (env, EMCA eh mpas) state =
         bList -> case [ pas | (b,pas) <- zip bList mpas, isTrueLiteral b] of
                     [] -> return Map.empty
                     (pas:_) -> return (Map.fromList [(idx, (env, EMCA eh [pas]))])
-  where
-    
+                          -- Todo: What is meant by idx here??
+                          --       It seems that the idx is not used in the following evalAction.
+                          --       This is because of the definition of Ruleset, which is 
+                          --       Map.Map Integer RuleClosure.
 
 ------------------------------------------------------------------------------------------
 -- | Operations over literals (values)
@@ -263,8 +272,48 @@ greaterThanOrEqualTo e1 e2 = error $ "Unexpected operands in greaterThanOrEqualT
 -- | evalAction:
 -- | [[ r ]]_a sigma = 
 ------------------------------------------------------------------------------------------
-evalAction :: RuleClosure -> State -> IO (State, Set.Set Event)
-evalAction = undefined
+evalActionFrom :: Integer -> RuleClosure -> State -> IO (State, Set.Set Event)
+evalActionFrom _ (env, EMCA _ [(_, actions)]) state = evalActions env state actions
+evalActionFrom _ _ _ = error $ "evalActionFrom: unexpected configuration of EMCA"
+
+
+evalActions :: Environment -> State -> Actions -> IO (State, Set.Set Event)
+evalActions _ state [] = return (state, Set.empty)
+evalActions env state (action : actions) = 
+  do (state1, eventSet1) <- evalAction env state action
+     (state2, eventSet2) <- evalActions env state1 actions
+     return (state2, Set.union eventSet1 eventSet2)
+
+evalAction :: Environment -> State -> Action -> IO (State, Set.Set Event)
+evalAction env state (CommandAction (Field dev attr) e) = 
+  do  litFrom <- eval env state (Field dev attr)
+      litTo <- eval env state e
+      let event = EventField dev attr litFrom litTo
+      let state' = Map.insert dev 
+                    (Map.insert attr litTo 
+                      (Maybe.fromMaybe Map.empty (Map.lookup dev state))) state
+      return (state', Set.singleton event)
+
+evalAction _ _ (CommandAction _ e) = error $ "evalAction: CommandAction is not implemented"
+
+evalAction env state (OutputAction n es) =
+  do  lits <- mapM (eval env state) es
+      putStrLn $ "OutputAction: " ++ show n ++ " " ++ show lits
+      return (state, Set.empty)
+
+evalAction env state (StartTimer t e) = 
+  do  lit <- eval env state e
+      let timerTo = addition lit (NumberLiteral 1)
+      let timerEvent = EventTimer t lit timerTo
+      let timerState = Map.fromList [("timer", timerTo)]  -- Fix: hard coding!
+      return (Map.insert t timerState state , Set.singleton timerEvent)
+
+evalAction _ state (StopTimer t) = 
+  do  let state' = Map.delete t state
+      return (state', Set.empty)
+
+evalAction _ _ _ = error $ "evalAction: MapAction is not implemented"
+
 
 ------------------------------------------------------------------------------------------
 -- | eval expressions, predicates, identifiers, timers, and fields

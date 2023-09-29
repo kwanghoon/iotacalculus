@@ -71,8 +71,8 @@ parserSpec = ParserSpec
 
       rule "ZeroOrMoreDecls -> Decl ZeroOrMoreDecls"
         ( \rhs -> let decl  = fromASTDecl (get rhs 1)
-	              decls = fromASTDecls (get rhs 2)
-		  in  return $ toASTDecls (decl : decls) ),
+                      decls = fromASTDecls (get rhs 2)
+                  in  return $ toASTDecls (decl : decls) ),
 		  
       -- | Decl : Decl
       rule "Decl -> device identifier : identifier ;"  -- device name : capability
@@ -118,20 +118,20 @@ parserSpec = ParserSpec
       
       rule "EventHandler -> FieldOrTimer [ . ~> Constant ]"
         ( \rhs -> let fieldOrTimer = fromASTExpression (get rhs 1)
-	              constant = fromASTConstant (get rhs 5)
+	              constant = fromASTLiteral (get rhs 5)
 		  in  return $ toASTEventHandler $ EventTo fieldOrTimer constant
 	),
       
       rule "EventHandler -> FieldOrTimer [ Constant ~> ]"
         ( \rhs -> let fieldOrTimer = fromASTExpression (get rhs 1)
-	              constant = fromASTConstant (get rhs 3)
+	              constant = fromASTLiteral (get rhs 3)
 		  in  return $ toASTEventHandler $ EventFrom fieldOrTimer constant
 	),
       
       rule "EventHandler -> FieldOrTimer [ Constant ~> Constant ]"
         ( \rhs -> let fieldOrTimer = fromASTExpression (get rhs 1)
-	              constantFrom = fromASTConstant (get rhs 3)
-	              constantTo = fromASTConstant (get rhs 5)
+	              constantFrom = fromASTLiteral (get rhs 3)
+	              constantTo = fromASTLiteral (get rhs 5)
 		  in  return $ toASTEventHandler $ EventFromTo fieldOrTimer constantFrom constantTo
 	),
       
@@ -322,10 +322,10 @@ parserSpec = ParserSpec
 
       -- | Constant : String
       rule "Constant -> identifier"
-        ( \rhs -> return $ toASTConstant (getText rhs 1) ),
+        ( \rhs -> return $ toASTLiteral (ConstantLiteral (getText rhs 1)) ),
       
       rule "Constant -> number_literal"
-        ( \rhs -> return $ toASTConstant (getText rhs 1) ),
+        ( \rhs -> return $ toASTLiteral (NumberLiteral (read (getText rhs 1) :: Integer)) ),
       
       -- | Actions : [ Action ]
       rule "Actions -> "

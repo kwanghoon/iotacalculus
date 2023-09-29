@@ -5,6 +5,7 @@ module Expr where
 import Data.Aeson
 import Data.Aeson.Key (fromString)
 import Data.Aeson.Encode.Pretty (encodePretty)
+import Data.List (isPrefixOf, isSuffixOf)
 
 import GHC.Generics ( Generic )
 import qualified Data.ByteString.Lazy.Char8 as B
@@ -69,7 +70,7 @@ instance ToJSON EMCA where
 
 type BoundVariable = String
 
-type EventConstant = String
+type EventConstant = Literal
 
 data EventHandler =
     JustEvent FieldOrTimer                          -- fOrM [ . ~> ]
@@ -154,6 +155,22 @@ data Literal =
   | StringLiteral String
   | ConstantLiteral String
   deriving (Show, Generic, Ord, Eq)
+
+strToLiteral :: String -> Literal
+strToLiteral "true" = BoolLiteral True
+strToLiteral "false" = BoolLiteral False
+strToLiteral s
+  | isNumeric s = NumberLiteral (read s :: Integer)
+  | isDoubleQuoted s = StringLiteral (init (tail s))
+  | otherwise = ConstantLiteral s
+
+isNumeric :: String -> Bool
+isNumeric s = case reads s :: [(Double, String)] of
+                [(_, "")] -> True
+                _         -> False
+
+isDoubleQuoted :: String -> Bool
+isDoubleQuoted s = "\"" `isPrefixOf` s && "\"" `isSuffixOf` s                
 
 instance FromJSON Literal
 

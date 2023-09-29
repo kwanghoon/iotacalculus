@@ -20,7 +20,7 @@ data AST =
  | ASTExpression { fromASTExpression :: Expression }
  | ASTExpressions { fromASTExpressions :: [ Expression ] }
  | ASTLiteral { fromASTLiteral :: Literal }
- | ASTConstant { fromASTConstant :: String }
+ | ASTConstant { fromASTConstant :: Literal }
  | ASTGroup { fromASTGroup :: Group }
 
 toASTRule rule = ASTRule rule
