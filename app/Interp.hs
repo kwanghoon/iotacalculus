@@ -5,8 +5,8 @@ import qualified Data.Map   as Map
 import qualified Data.Maybe as Maybe
 
 import Expr
-import Data.Functor.Contravariant (Predicate(Predicate))
-import Data.ByteString (index)
+-- import Data.Functor.Contravariant (Predicate(Predicate))
+-- import Data.ByteString (index)
 
 data Event =
     EventField DeviceName AttributeName EventConstant EventConstant
@@ -183,60 +183,14 @@ evalEvent _ _ evH event = error $ "evalEvent: " ++ show evH ++ " over " ++ show 
 ------------------------------------------------------------------------------------------
 evalPredicate :: Integer -> RuleClosure -> State -> IO Ruleset
 evalPredicate idx (env, EMCA eh mpas) state = 
-  do  sats <- mapM (\ (p, _) -> satisfied p) mpas
+  do  sats <- mapM (\ (p, _) -> satisfied env state p) mpas
       case sats of
         [] -> return Map.empty
         bList -> case [ pas | (b,pas) <- zip bList mpas, isTrueLiteral b] of
                     [] -> return Map.empty
                     (pas:_) -> return (Map.fromList [(idx, (env, EMCA eh [pas]))])
   where
-    satisfied :: Expr.Predicate -> IO Expr.Literal
-    satisfied (LogicalAnd p1 p2) = logicalAnd <$> satisfied p1 <*> satisfied p2
-    satisfied (LogicalOr p1 p2) = logicalOr <$> satisfied p1 <*> satisfied p2
-    satisfied (IsEqual p1 p2) = isEqual <$> satisfied p1 <*> satisfied p2
-    satisfied (IsInequal p1 p2) = isInequal <$> satisfied p1 <*> satisfied p2
-    satisfied (LessThan p e) = lessThan <$> satisfied p <*> eval e
-    satisfied (LessThanOrEqualTo p e) = lessThanOrEqualTo <$> satisfied p <*> eval e
-    satisfied (GreaterThan p e) = greaterThan <$> satisfied p <*> eval e
-    satisfied (GreaterThanOrEqualTo p e) = greaterThanOrEqualTo <$> satisfied p <*> eval e
-    satisfied (ExpressionPredicate e) = eval e
-    satisfied _ = error "Unexpected predicate in satisfied"
-
-    -- satisfied (Forall g b p) = all (\ x -> satisfied (substitute b x p)) (group g) 
-    -- satisfied (Exists g b p) = all (\ x -> satisfied (substitute b x p)) (group g) 
-
-    eval :: Expr.Expression -> IO Expr.Literal
-    eval (Addition e1 e2) = addition <$> eval e1 <*> eval e2
-    eval (Subtraction e1 e2) = subtraction <$> eval e1 <*> eval e2
-    eval (Multiplication e1 e2) = multiplication <$> eval e1 <*> eval e2
-    eval (Division e1 e2) = division <$> eval e1 <*> eval e2
-    eval (MinusSign e) = minusSign <$> eval e
-    eval (Negate e) = Interp.negate <$> eval e
-    eval (LiteralExpression l) = return l
-    eval (IdentifierExpression s) = evalIdentifier env s
-    eval (Field devName fieldName) = evalField state devName fieldName
-    eval (Timer timerName) = evalTimer state timerName
-    eval (PredicateExpression p) = satisfied p
-    eval _ = error "Unexpected expression in eval"
-
-    evalIdentifier :: Environment -> String -> IO Expr.Literal
-    evalIdentifier environment s = 
-      case Map.lookup s environment of
-        Just (lit, _) -> return lit
-        Nothing ->  error $ "evalIdentifier: " ++ s    
-
-    evalField :: State -> DeviceName -> AttributeName -> IO Expr.Literal
-    evalField deviceState devName fieldName = 
-      case Map.lookup devName deviceState of
-        Just attrs -> 
-          case Map.lookup fieldName attrs of
-            Just lit -> return lit
-            Nothing -> error $ "evalField: " ++ fieldName
-        Nothing -> error $ "evalField: " ++ devName
-
-    evalTimer :: State -> TimerName -> IO Expr.Literal
-    evalTimer deviceState timerName = 
-      evalField deviceState timerName "timer"  -- Todo: fix this hard coding!
+    
 
 ------------------------------------------------------------------------------------------
 -- | Operations over literals (values)
@@ -313,13 +267,62 @@ evalAction :: RuleClosure -> State -> IO (State, Set.Set Event)
 evalAction = undefined
 
 ------------------------------------------------------------------------------------------
+-- | eval expressions, predicates, identifiers, timers, and fields
+------------------------------------------------------------------------------------------
+
+satisfied :: Environment -> State -> Expr.Predicate -> IO Expr.Literal
+satisfied env state (LogicalAnd p1 p2) = logicalAnd <$> satisfied env state p1 <*> satisfied env state p2
+satisfied env state (LogicalOr p1 p2) = logicalOr <$> satisfied env state p1 <*> satisfied env state p2
+satisfied env state (IsEqual p1 p2) = isEqual <$> satisfied env state p1 <*> satisfied env state p2
+satisfied env state (IsInequal p1 p2) = isInequal <$> satisfied env state p1 <*> satisfied env state p2
+satisfied env state (LessThan p e) = lessThan <$> satisfied env state p <*> eval env state e
+satisfied env state (LessThanOrEqualTo p e) = lessThanOrEqualTo <$> satisfied env state p <*> eval env state e
+satisfied env state (GreaterThan p e) = greaterThan <$> satisfied env state p <*> eval env state e
+satisfied env state (GreaterThanOrEqualTo p e) = greaterThanOrEqualTo <$> satisfied env state p <*> eval env state e
+satisfied env state (ExpressionPredicate e) = eval env state e
+satisfied _ _ _ = error "Unexpected predicate in satisfied"
+
+-- satisfied (Forall g b p) = all (\ x -> satisfied (substitute b x p)) (group g) 
+-- satisfied (Exists g b p) = all (\ x -> satisfied (substitute b x p)) (group g) 
+
+eval :: Environment -> State -> Expr.Expression -> IO Expr.Literal
+eval env state (Addition e1 e2) = addition <$> eval env state e1 <*> eval env state e2
+eval env state (Subtraction e1 e2) = subtraction <$> eval env state e1 <*> eval env state e2
+eval env state (Multiplication e1 e2) = multiplication <$> eval env state e1 <*> eval env state e2
+eval env state (Division e1 e2) = division <$> eval env state e1 <*> eval env state e2
+eval env state (MinusSign e) = minusSign <$> eval env state e
+eval env state (Negate e) = Interp.negate <$> eval env state e
+eval env state (LiteralExpression l) = return l
+eval env state (IdentifierExpression s) = evalIdentifier env s
+eval env state (Field devName fieldName) = evalField state devName fieldName
+eval env state (Timer timerName) = evalTimer state timerName
+eval env state (PredicateExpression p) = satisfied env state p
+
+evalIdentifier :: Environment -> String -> IO Expr.Literal
+evalIdentifier environment s = 
+  case Map.lookup s environment of
+    Just (lit, _) -> return lit
+    Nothing ->  error $ "evalIdentifier: " ++ s    
+
+evalField :: State -> DeviceName -> AttributeName -> IO Expr.Literal
+evalField deviceState devName fieldName = 
+  case Map.lookup devName deviceState of
+    Just attrs -> 
+      case Map.lookup fieldName attrs of
+        Just lit -> return lit
+        Nothing -> error $ "evalField: " ++ fieldName
+    Nothing -> error $ "evalField: " ++ devName
+
+evalTimer :: State -> TimerName -> IO Expr.Literal
+evalTimer deviceState timerName = 
+  evalField deviceState timerName "timer"  -- Todo: fix this hard coding!
 
 
 -- | Utilities
 
 -- Reverse of disjoint union for map
 --    * Assume the map is not empty.
-revDisjointUnionMap :: (Ord k, Ord a) => Map.Map k a -> IO ((k,a), Map.Map k a)
+revDisjointUnionMap :: (Ord k) => Map.Map k a -> IO ((k,a), Map.Map k a)
 revDisjointUnionMap mapmap = 
   do  let list = Map.assocs mapmap
       list' <- revDisjointUnionForList list
