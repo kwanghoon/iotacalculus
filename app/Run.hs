@@ -37,7 +37,20 @@ doProcess verbose fileName = do
   when (verbose) $ putStrLn "Parsing..."
   astRule <- parsing False parserSpec ((),1,1,text)
             (aLexer lexerSpec) (fromToken (endOfToken lexerSpec))
-  -- when (verbose) $ putStrLn (show (fromASTRule astRule))
-  -- when (verbose) $ putStrLn (show (toJSON (fromASTRule astRule)))
-  when (verbose) $ B.putStrLn $ toJson $ fromASTRule astRule
+  let rule = fromASTRule astRule	    
+  -- when (verbose) $ putStrLn (show rule)
+  -- when (verbose) $ putStrLn (show (toJSON rule))
+  when (verbose) $ ruleTojson rule
   when (verbose) $ putStrLn "Done."
+
+-- | Utilities
+
+load :: FilePath -> IO Rule
+load fileName =
+  do text <- readFile fileName
+     astRule <- parsing False parserSpec ((),1,1,text)
+                  (aLexer lexerSpec) (fromToken (endOfToken lexerSpec))
+     return $ fromASTRule astRule
+
+ruleTojson :: Rule -> IO ()
+ruleTojson rule = B.putStrLn $ toJson $ rule

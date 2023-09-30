@@ -40,11 +40,16 @@ data EvalState =
  | ActEvalState   Ruleset Ruleset  -- (In, Out)
 
 ------------------------------------------------------------------------------------------
--- | (R-E) rule event
+-- | Driver
 ------------------------------------------------------------------------------------------
 
-evalREvent :: Set.Set Event -> Set.Set State -> Ruleset ->
- IO (Maybe.Maybe Event, Set.Set Event, Set.Set State, EvalState)
+
+------------------------------------------------------------------------------------------
+-- | (R-E) rule event
+------------------------------------------------------------------------------------------
+ 
+evalREvent :: Set.Set Event -> State -> Ruleset ->
+ IO (Maybe.Maybe Event, Set.Set Event, State, EvalState)
 
 evalREvent eventSet stateSet ruleset
  | Set.null eventSet = 
@@ -71,6 +76,19 @@ evalRHandleEvent event eventSet stateSet rulesetIn rulesetOut
         let (idx, rule) = indexedRule
         rs <- evalEvent idx rule (Interp.eventHandler rule) event
         return (event, eventSet, stateSet, EventEvalState rs1 (Map.union rs rulesetOut))
+
+
+-- driverEvalRHandlEvent event eventSet stateSet rulesetIn rulesetOut =
+--  do (maybeEvent, eventSet', stateSet', status')
+--       <- evalRHandleEvent event eventSet stateSet rulesetInt rulesetOut
+      
+--     case (maybeEvent, status') of
+--       (Maybe.Nothing, NoneEvalState) -> 
+--         return (maybeEvent,
+	
+--       (Maybe.Just event', EventEvalState rulesetIn' rulesetOut') -> 
+--         return (maybeEvent, 
+
 
 ------------------------------------------------------------------------------------------
 -- | (R-P) and (R-PA) with PredES rulesetIn rulesetOut
