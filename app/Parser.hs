@@ -81,6 +81,13 @@ parserSpec = ParserSpec
 		  in  return $ toASTDecl ( DeviceDecl name capability )
 	),
 
+      rule "Decl -> device identifier : identifier . identifier ;"  -- device name : capability
+        ( \rhs -> let name = getText rhs 2
+	              capability1 = getText rhs 4
+	              capability2 = getText rhs 6
+		  in  return $ toASTDecl ( DeviceDecl name (capability1 ++ "." ++ capability2) )
+	),
+
       rule "Decl -> input identifier : identifier ;"  -- input name : value type
         ( \rhs -> let name = getText rhs 2
 	              valuetype = getText rhs 4

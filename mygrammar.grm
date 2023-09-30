@@ -11,6 +11,7 @@
  ProductionRule "ZeroOrMoreDecls" [],
  ProductionRule "ZeroOrMoreDecls" [Nonterminal "Decl", Nonterminal "ZeroOrMoreDecls"],
  ProductionRule "Decl" [Terminal "device", Terminal "identifier", Terminal ":", Terminal "identifier", Terminal ";"],
+ ProductionRule "Decl" [Terminal "device", Terminal "identifier", Terminal ":", Terminal "identifier", Terminal ".", Terminal "identifier", Terminal ";"],
  ProductionRule "Decl" [Terminal "input", Terminal "identifier", Terminal ":", Terminal "identifier", Terminal ";"],
  ProductionRule "Decl" [Terminal "output", Terminal "identifier", Terminal ":", Terminal "identifier", Terminal ";"],
  ProductionRule "Decl" [Terminal "output", Terminal "identifier", Terminal ":", Terminal "(", Nonterminal "OneOrMoreIdentifiers", Terminal ")", Terminal ";"],

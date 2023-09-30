@@ -10,67 +10,68 @@
 9: ZeroOrMoreDecls -> 
 10: ZeroOrMoreDecls -> Decl ZeroOrMoreDecls
 11: Decl -> device identifier : identifier ;
-12: Decl -> input identifier : identifier ;
-13: Decl -> output identifier : identifier ;
-14: Decl -> output identifier : ( OneOrMoreIdentifiers ) ;
-15: OneOrMoreIdentifiers -> identifier
-16: OneOrMoreIdentifiers -> identifier , OneOrMoreIdentifiers
-17: EventHandler -> FieldOrTimer [ . ~> ]
-18: EventHandler -> FieldOrTimer [ . ~> Constant ]
-19: EventHandler -> FieldOrTimer [ Constant ~> ]
-20: EventHandler -> FieldOrTimer [ Constant ~> Constant ]
-21: EventHandler -> any Group ( identifier -> EventHandler )
-22: OneOrMorePredicateActions -> Predicate ; Actions
-23: OneOrMorePredicateActions -> Predicate ; Actions | OneOrMorePredicateActions
-24: Predicate -> OrPred
-25: Predicate -> all Group ( identifier -> Predicate )
-26: Predicate -> exists Group ( identifier -> Predicate )
-27: OrPred -> OrPred || AndPred
-28: OrPred -> AndPred
-29: AndPred -> AndPred && EqNeqPred
-30: AndPred -> EqNeqPred
-31: EqNeqPred -> EqNeqPred == CompExpr
-32: EqNeqPred -> EqNeqPred != CompExpr
-33: EqNeqPred -> CompExpr
-34: CompExpr -> CompExpr < AdditiveExpr
-35: CompExpr -> CompExpr <= AdditiveExpr
-36: CompExpr -> CompExpr > AdditiveExpr
-37: CompExpr -> CompExpr >= AdditiveExpr
-38: CompExpr -> AdditiveExpr
-39: AdditiveExpr -> AdditiveExpr + MultiplicativeExpr
-40: AdditiveExpr -> AdditiveExpr - MultiplicativeExpr
-41: AdditiveExpr -> MultiplicativeExpr
-42: MultiplicativeExpr -> MultiplicativeExpr * UnaryExpr
-43: MultiplicativeExpr -> MultiplicativeExpr / UnaryExpr
-44: MultiplicativeExpr -> UnaryExpr
-45: UnaryExpr -> - PrimaryExpr
-46: UnaryExpr -> ~ PrimaryExpr
-47: UnaryExpr -> PrimaryExpr
-48: PrimaryExpr -> true
-49: PrimaryExpr -> false
-50: PrimaryExpr -> number_literal
-51: PrimaryExpr -> string_literal
-52: PrimaryExpr -> identifier
-53: PrimaryExpr -> identifier . identifier
-54: PrimaryExpr -> ( Predicate )
-55: Constant -> identifier
-56: Constant -> number_literal
-57: Actions -> 
-58: Actions -> OneOrMoreActions
-59: OneOrMoreActions -> Action
-60: OneOrMoreActions -> Action , OneOrMoreActions
-61: Action -> FieldOrTimer := AdditiveExpr
-62: Action -> identifier ( OneOrMoreAdditiveExprs )
-63: Action -> start identifier at AdditiveExpr
-64: Action -> stop identifier
-65: Action -> map Group ( identifier -> Action )
-66: OneOrMoreAdditiveExprs -> AdditiveExpr
-67: OneOrMoreAdditiveExprs -> AdditiveExpr , OneOrMoreAdditiveExprs
-68: FieldOrTimer -> identifier
-69: FieldOrTimer -> identifier . identifier
-70: Group -> identifier
-71: Group -> { zero_or_more_device_identifiers }
-72: zero_or_more_device_identifiers -> 
-73: zero_or_more_device_identifiers -> one_or_more_device_identifiers
-74: one_or_more_device_identifiers -> identifier
-75: one_or_more_device_identifiers -> identifier , one_or_more_device_identifiers
+12: Decl -> device identifier : identifier . identifier ;
+13: Decl -> input identifier : identifier ;
+14: Decl -> output identifier : identifier ;
+15: Decl -> output identifier : ( OneOrMoreIdentifiers ) ;
+16: OneOrMoreIdentifiers -> identifier
+17: OneOrMoreIdentifiers -> identifier , OneOrMoreIdentifiers
+18: EventHandler -> FieldOrTimer [ . ~> ]
+19: EventHandler -> FieldOrTimer [ . ~> Constant ]
+20: EventHandler -> FieldOrTimer [ Constant ~> ]
+21: EventHandler -> FieldOrTimer [ Constant ~> Constant ]
+22: EventHandler -> any Group ( identifier -> EventHandler )
+23: OneOrMorePredicateActions -> Predicate ; Actions
+24: OneOrMorePredicateActions -> Predicate ; Actions | OneOrMorePredicateActions
+25: Predicate -> OrPred
+26: Predicate -> all Group ( identifier -> Predicate )
+27: Predicate -> exists Group ( identifier -> Predicate )
+28: OrPred -> OrPred || AndPred
+29: OrPred -> AndPred
+30: AndPred -> AndPred && EqNeqPred
+31: AndPred -> EqNeqPred
+32: EqNeqPred -> EqNeqPred == CompExpr
+33: EqNeqPred -> EqNeqPred != CompExpr
+34: EqNeqPred -> CompExpr
+35: CompExpr -> CompExpr < AdditiveExpr
+36: CompExpr -> CompExpr <= AdditiveExpr
+37: CompExpr -> CompExpr > AdditiveExpr
+38: CompExpr -> CompExpr >= AdditiveExpr
+39: CompExpr -> AdditiveExpr
+40: AdditiveExpr -> AdditiveExpr + MultiplicativeExpr
+41: AdditiveExpr -> AdditiveExpr - MultiplicativeExpr
+42: AdditiveExpr -> MultiplicativeExpr
+43: MultiplicativeExpr -> MultiplicativeExpr * UnaryExpr
+44: MultiplicativeExpr -> MultiplicativeExpr / UnaryExpr
+45: MultiplicativeExpr -> UnaryExpr
+46: UnaryExpr -> - PrimaryExpr
+47: UnaryExpr -> ~ PrimaryExpr
+48: UnaryExpr -> PrimaryExpr
+49: PrimaryExpr -> true
+50: PrimaryExpr -> false
+51: PrimaryExpr -> number_literal
+52: PrimaryExpr -> string_literal
+53: PrimaryExpr -> identifier
+54: PrimaryExpr -> identifier . identifier
+55: PrimaryExpr -> ( Predicate )
+56: Constant -> identifier
+57: Constant -> number_literal
+58: Actions -> 
+59: Actions -> OneOrMoreActions
+60: OneOrMoreActions -> Action
+61: OneOrMoreActions -> Action , OneOrMoreActions
+62: Action -> FieldOrTimer := AdditiveExpr
+63: Action -> identifier ( OneOrMoreAdditiveExprs )
+64: Action -> start identifier at AdditiveExpr
+65: Action -> stop identifier
+66: Action -> map Group ( identifier -> Action )
+67: OneOrMoreAdditiveExprs -> AdditiveExpr
+68: OneOrMoreAdditiveExprs -> AdditiveExpr , OneOrMoreAdditiveExprs
+69: FieldOrTimer -> identifier
+70: FieldOrTimer -> identifier . identifier
+71: Group -> identifier
+72: Group -> { zero_or_more_device_identifiers }
+73: zero_or_more_device_identifiers -> 
+74: zero_or_more_device_identifiers -> one_or_more_device_identifiers
+75: one_or_more_device_identifiers -> identifier
+76: one_or_more_device_identifiers -> identifier , one_or_more_device_identifiers
