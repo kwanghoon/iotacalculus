@@ -61,6 +61,7 @@ data EMCA =
     EMCA EventHandler MultiplePredicateActions
   deriving (Show, Generic, Ord, Eq)
 
+eventHandler :: EMCA -> EventHandler
 eventHandler (EMCA evH _) = evH  
 
 instance FromJSON EMCA

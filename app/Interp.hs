@@ -4,9 +4,9 @@ import qualified Data.Set   as Set
 import qualified Data.Map   as Map
 import qualified Data.Maybe as Maybe
 
+import Control.Monad (foldM)
+
 import Expr
--- import Data.Functor.Contravariant (Predicate(Predicate))
--- import Data.ByteString (index)
 
 data Event =
     EventField DeviceName AttributeName EventConstant EventConstant
@@ -16,12 +16,7 @@ data Event =
 type State = Map.Map DeviceName (Map.Map Expr.AttributeName Expr.Literal)
 
 -- | Environments
-type Environment = Map.Map Name (Expr.Literal, ValueType)  -- Input declaration environments!!
-
-data DeclValue =
-   Device Capability
- | Input  ValueType
- | Output [ ValueType ]
+type Environment = Map.Map DeclName Name  -- Device, Input, and Output declaration environments!!
 
 type RuleClosure = (Environment, EMCA)
 
@@ -31,6 +26,9 @@ eventHandler (_, emca) = Expr.eventHandler emca
 -- | Rule sets
 type Ruleset = Map.Map Integer RuleClosure
 
+type RulesetIn = Ruleset
+type RulesetOut = Ruleset
+
 type IndexedRuleClosure = (Integer, RuleClosure) -- (index, rule closure)
 
 data EvalState =
@@ -39,10 +37,62 @@ data EvalState =
  | PredEvalState  Ruleset Ruleset  -- (In, Out)
  | ActEvalState   Ruleset Ruleset  -- (In, Out)
 
+ ------------------------------------------------------------------------------------------
+ -- | Internet of things
+ ------------------------------------------------------------------------------------------
+
+type DeclName = Name
+
+type IoT = (DeviceIoT, InputIoT, OutputIoT)
+
+type DeviceIoT = Map.Map DeviceName (Capability, Map.Map AttributeName Literal)
+type InputIoT  = Map.Map Name (ValueType, Literal)
+type OutputIoT = Map.Map Name ([ ValueType], [ Literal ])
+
+{-
 ------------------------------------------------------------------------------------------
 -- | Driver
 ------------------------------------------------------------------------------------------
 
+installRule :: IoT -> Environment -> Rule -> IO Ruleset
+installRule iot env (NodeRule _ decls rs) = 
+  do env' <- foldM (installDecl iot) env decls
+     rsList <- mapM (installRule iot env') rs
+     return $ foldl Map.union Map.empty rsList
+
+installRule iot env (LeafRule _ decls emca) =
+  do env' <- foldM (installDecl iot) env decls
+     return $ Map.fromList [ (0, (env', emca)) ]
+
+installDecl :: IoT -> Environment -> Decl -> IO Environment
+installDecl iot env (DeviceDecl n cap) =
+  do putStrLn n
+     putStrLn cap
+     putStrLn (show iot)
+     name <- getLine
+     return $ Map.insert n name env
+     
+installDecl _ env _ = return env -- Todo: do something!
+
+driverECA :: Set.Set Event -> State -> Ruleset -> IO (Set.Set Event, State)
+driverECA eventSet state ruleset =
+  do  (maybeEvent, eventSet, state, status) <- driverNoneEvalState eventSet state ruleset
+      case status of
+        NoneEvalState -> 
+          if Set.null eventSet then  -- terminal condition! Note maybeEvent must be Nothing.
+              return (eventSet, state)
+          else driverECA eventSet state ruleset
+        _ -> let event = Maybe.fromJust maybeEvent in
+             do (_, _, _, rulesetIn1, rulesetOut1) <- 
+                  driverEventEvalState event eventSet state ruleset Map.empty
+
+                (_, _, _, rulesetIn2, rulesetOut2) <-
+                  driverPredEvalState event eventSet state rulesetIn1 rulesetOut1
+
+                (_, eventSet', state', _) <-
+                  driverActEvalState event eventSet state rulesetIn2 rulesetOut2
+
+                driverECA eventSet' state' ruleset
 
 ------------------------------------------------------------------------------------------
 -- | (R-E) rule event
@@ -51,43 +101,42 @@ data EvalState =
 evalREvent :: Set.Set Event -> State -> Ruleset ->
  IO (Maybe.Maybe Event, Set.Set Event, State, EvalState)
 
-evalREvent eventSet stateSet ruleset
+evalREvent eventSet state ruleset
  | Set.null eventSet = 
-    return (Maybe.Nothing, eventSet, stateSet, NoneEvalState)
+    return (Maybe.Nothing, eventSet, state, NoneEvalState)
 
  | otherwise =
     do (e, es) <- revDisjointUnion eventSet    -- eventSet = { e } U es
-       return (Maybe.Just e, es, stateSet, EventEvalState ruleset Map.empty)
+       return (Maybe.Just e, es, state, EventEvalState ruleset Map.empty)
+
+driverNoneEvalState eventSet state ruleset = evalREvent eventSet state ruleset
 
 ------------------------------------------------------------------------------------------
 -- | (R-H) and (R-HP) with EventEvalState rulesetIn rulsetOut
 ------------------------------------------------------------------------------------------
 
 evalRHandleEvent 
-  :: Event -> Set.Set Event -> State -> Ruleset -> Ruleset 
+  :: Event -> Set.Set Event -> State -> RulesetIn -> RulesetOut
       -> IO (Event, Set.Set Event, State, EvalState)
-evalRHandleEvent event eventSet stateSet rulesetIn rulesetOut
+evalRHandleEvent event eventSet state rulesetIn rulesetOut
 
  | Map.null rulesetIn =
-     return (event, eventSet, stateSet, PredEvalState rulesetOut Map.empty)
+     return (event, eventSet, state, PredEvalState rulesetOut Map.empty)
 
  | otherwise =
      do (indexedRule, rs1) <- revDisjointUnionMap rulesetIn
         let (idx, rule) = indexedRule
         rs <- evalEvent idx rule (Interp.eventHandler rule) event
-        return (event, eventSet, stateSet, EventEvalState rs1 (Map.union rs rulesetOut))
+        return (event, eventSet, state, EventEvalState rs1 (Map.union rs rulesetOut))
 
 
--- driverEvalRHandlEvent event eventSet stateSet rulesetIn rulesetOut =
---  do (maybeEvent, eventSet', stateSet', status')
---       <- evalRHandleEvent event eventSet stateSet rulesetInt rulesetOut
-      
---     case (maybeEvent, status') of
---       (Maybe.Nothing, NoneEvalState) -> 
---         return (maybeEvent,
-	
---       (Maybe.Just event', EventEvalState rulesetIn' rulesetOut') -> 
---         return (maybeEvent, 
+driverEventEvalState event eventSet state rulesetIn rulesetOut =
+ do (_, _, _, status) <- evalRHandleEvent event eventSet state rulesetIn rulesetOut
+    case status of
+      PredEvalState rulesetIn' rulesetOut' -> return (event, eventSet, state, rulesetIn', rulesetOut')
+      EventEvalState rulesetIn' rulesetOut' ->
+        driverEventEvalState event eventSet state rulesetIn' rulesetOut'
+      _ -> error $ "driverEventEvalState: unexpected status"
 
 
 ------------------------------------------------------------------------------------------
@@ -95,18 +144,26 @@ evalRHandleEvent event eventSet stateSet rulesetIn rulesetOut
 ------------------------------------------------------------------------------------------
 
 evalRPredicate 
-  :: Event -> Set.Set Event -> State -> Map.Map Integer RuleClosure -> Ruleset 
+  :: Event -> Set.Set Event -> State -> RulesetIn -> RulesetOut
       -> IO (Event, Set.Set Event, State, EvalState)
-evalRPredicate event eventSet stateSet rulesetIn rulesetOut
+evalRPredicate event eventSet state rulesetIn rulesetOut
 
   | Map.null rulesetIn =
-      return (event, eventSet, stateSet, ActEvalState rulesetOut Map.empty)
+      return (event, eventSet, state, ActEvalState rulesetOut Map.empty)
 
   | otherwise =
       do  (indexedRule, rs1) <- revDisjointUnionMap rulesetIn
           let (idx, rule) = indexedRule
-          rs <- evalPredicate idx rule stateSet
-          return (event, eventSet, stateSet, PredEvalState rs1 (Map.union rs rulesetOut))
+          rs <- evalPredicate idx rule state
+          return (event, eventSet, state, PredEvalState rs1 (Map.union rs rulesetOut))
+
+driverPredEvalState event eventSet state rulesetIn rulesetOut =
+  do (_, _, _, status) <- evalRPredicate event eventSet state rulesetIn rulesetOut
+     case status of
+      ActEvalState rulesetIn' rulesetOut' -> return (event, eventSet, state, rulesetIn', rulesetOut')
+      PredEvalState rulesetIn' rulesetOut' -> 
+        driverPredEvalState event eventSet state rulesetIn' rulesetOut'
+      _ -> error $ "driverPredEvalState: unexpected status"
 
 ------------------------------------------------------------------------------------------
 -- | (R-A) and (R-AE) with PredES rulesetIn rulesetOut
@@ -118,20 +175,27 @@ evalRPredicate event eventSet stateSet rulesetIn rulesetOut
 ------------------------------------------------------------------------------------------
 
 evalRAction 
-  :: Event -> Set.Set Event -> State -> Map.Map Integer RuleClosure -> Ruleset 
+  :: Event -> Set.Set Event -> State -> RulesetIn -> RulesetOut
       -> IO (Maybe Event, Set.Set Event, State, EvalState)
-evalRAction event eventSet stateSet rulesetIn rulesetOut
+evalRAction event eventSet state rulesetIn rulesetOut
 
    | Map.null rulesetIn =
-       return (Maybe.Nothing, eventSet, stateSet, NoneEvalState) -- Note ruleset is removed from NoneEvalState.
+       return (Maybe.Nothing, eventSet, state, NoneEvalState) -- Note ruleset is removed from NoneEvalState.
 
    | otherwise =
        do (indexedRule, rs1) <- revDisjointUnionMap rulesetIn
           let (idx, rule) = indexedRule
-          (stateSet', eventSet') <- evalActionFrom idx rule stateSet
+          (state', eventSet') <- evalActionFrom idx rule state
           return (Maybe.Just event, 
-                    Set.union eventSet eventSet', stateSet', 
+                    Set.union eventSet eventSet', state', 
                       ActEvalState rs1 (Map.union (Map.fromList [indexedRule]) rulesetOut))
+
+driverActEvalState event eventSet state rulesetIn rulesetOut =
+  do (maybeEvent, eventSet', state', status) <- evalRAction event eventSet state rulesetIn rulesetOut
+     case status of
+      NoneEvalState -> return (maybeEvent, eventSet', state', status)
+      ActEvalState rulesetIn' rulesetOut' -> 
+        driverActEvalState event eventSet state rulesetIn' rulesetOut' 
 
 ------------------------------------------------------------------------------------------
 -- | evalEvent:
@@ -418,3 +482,4 @@ revDisjointUnionForList list =
   where
     f [] _         = []
     f (e:es) prev  = (e, prev ++ es) : f es (prev ++ [e])
+-}

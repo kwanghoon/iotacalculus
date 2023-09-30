@@ -12,6 +12,8 @@ import TokenInterface
 
 import Control.Monad (when)
 
+import qualified Data.Map as Map
+
 ------------------------------------------------------------------------
 -- | Pretty printing JSON
 ------------------------------------------------------------------------
@@ -40,7 +42,7 @@ doProcess verbose fileName = do
   let rule = fromASTRule astRule	    
   -- when (verbose) $ putStrLn (show rule)
   -- when (verbose) $ putStrLn (show (toJSON rule))
-  when (verbose) $ ruleTojson rule
+  when (verbose) $ ruleToJson rule
   when (verbose) $ putStrLn "Done."
 
 -- | Utilities
@@ -52,5 +54,33 @@ load fileName =
                   (aLexer lexerSpec) (fromToken (endOfToken lexerSpec))
      return $ fromASTRule astRule
 
-ruleTojson :: Rule -> IO ()
-ruleTojson rule = B.putStrLn $ toJson $ rule
+ruleToJson :: Rule -> IO ()
+ruleToJson rule = B.putStrLn $ toJson $ rule
+
+-- | Testing
+test1 :: IO ()
+test1 = do
+  rule <- load ".\\examples\\turn-on-hallway-light-when-the-front-door-unlocks.iota"
+  ruleToJson rule
+
+things1 :: Map.Map Name (Capability, Map.Map AttributeName Literal)
+things1 = 
+  Map.fromList [
+    ("front_door@myhome", 
+      ( "lock"
+      , Map.fromList [("lock", ConstantLiteral "locked")])),
+    ("hallway_light@myhome", 
+      ( "switch"
+      ,  Map.fromList [("switch", ConstantLiteral "off")]))
+  ]
+
+input1 :: Map.Map Name (ValueType, Literal)
+input1 =
+  Map.fromList [
+  ]
+
+output1 :: Map.Map Name ([ ValueType], [ Literal ])
+output1 =
+  Map.fromList [
+  ]
+
