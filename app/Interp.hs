@@ -20,6 +20,9 @@ type Environment = Map.Map DeclName Name  -- Device, Input, and Output declarati
 
 type RuleClosure = (Environment, EMCA)
 
+envFrom :: RuleClosure -> Environment
+envFrom = fst
+
 eventHandler :: RuleClosure -> EventHandler
 eventHandler (_, emca) = Expr.eventHandler emca
 
@@ -68,9 +71,9 @@ doCmd dev attr lit (devIot, inputIot, outputIot, timerIot) =     -- Implementati
   case Map.lookup dev devIot of
     Just (cap, attrs) -> 
       do let attrs' = Map.insert attr lit attrs
-         let devIot' = Map.insert dev (cap, attrs') devIot
-         return (devIot', inputIot, outputIot, timerIot)
-    Nothing -> return (devIot, inputIot, outputIot, timerIot)
+	 let devIot' = Map.insert dev (cap, attrs') devIot
+	 return (devIot', inputIot, outputIot, timerIot)
+    Nothing -> error $ "doCmd: not found in the state" ++ dev
      
 startTimer :: TimerName -> Literal -> IoT -> IO IoT
 startTimer timerName lit (devIot, inputIot, outputIot, timerIot) =     -- Implementation:   timerName := lit
@@ -91,6 +94,11 @@ readTimer timerName (_, _, _, timerIot) =
     Just lit -> return lit
     Nothing -> error $ "readTimer: " ++ timerName     
 
+areNamesEqual :: Environment -> Name -> Name -> Bool
+areNamesEqual env declName name2 =
+  case Map.lookup declName env of
+    Nothing -> error $ "areDevNamesEqual: not found " ++ declName
+    Just name1 -> name1 == name2
 
 ------------------------------------------------------------------------------------------
 -- | Driver
@@ -155,7 +163,7 @@ evalRHandleEvent event eventSet state rulesetIn rulesetOut
 
  | otherwise =
      do (rule, rs1) <- revDisjointUnion rulesetIn
-        rs <- evalEvent rule (Interp.eventHandler rule) event
+        rs <- evalEvent (envFrom rule) rule (Interp.eventHandler rule) event
         return (event, eventSet, state, EventEvalState rs1 (Set.union rs rulesetOut))
 
 
@@ -222,73 +230,75 @@ driverActEvalState event eventSet state rulesetIn rulesetOut =
      case status of
       NoneEvalState -> return (maybeEvent, eventSet', state', status)
       ActEvalState rulesetIn' rulesetOut' -> 
-        driverActEvalState event eventSet state rulesetIn' rulesetOut' 
+        driverActEvalState event eventSet state' rulesetIn' rulesetOut' 
 
 ------------------------------------------------------------------------------------------
 -- | evalEvent:
 -- | [[ r ]]_h e = rs
--- |   Note that the 3rd argument is one extracted from the 2nd argument.
+-- |   Note that the 1st and 3rd arguments are extracted from the 2nd argument.
 ------------------------------------------------------------------------------------------
 
-evalEvent :: RuleClosure -> EventHandler -> Event -> IO Ruleset
+evalEvent :: Environment -> RuleClosure -> EventHandler -> Event -> IO Ruleset
 
 -- for JustEvent
-evalEvent rc (JustEvent (Field devName1 fieldName1)) 
+evalEvent env rc (JustEvent (Field devName1 fieldName1)) 
                   (EventField devName2 fieldName2 _ _)
-  | devName1 == devName2 && fieldName1 == fieldName2
+  | areNamesEqual env devName1 devName2 && fieldName1 == fieldName2
     = return $ Set.fromList [ rc]
   | otherwise = return Set.empty
 
-evalEvent rc (JustEvent (Timer timerName)) 
+evalEvent env rc (JustEvent (Timer timerName)) 
                   (EventTimer timerName' _ _)
-  | timerName == timerName' = return $ Set.fromList [ rc]
+  | areNamesEqual env timerName timerName' = return $ Set.fromList [ rc]
   | otherwise = return Set.empty
 
 -- for EventTo
-evalEvent rc (EventTo (Field devName1 fieldName1) eventConstant1)
+evalEvent env rc (EventTo (Field devName1 fieldName1) eventConstant1)
                   (EventField devName2 fieldName2 _ eventConstant2)
-  | devName1 == devName2 && fieldName1 == fieldName2 && eventConstant1 == eventConstant2
+  | areNamesEqual env devName1 devName2
+    && fieldName1 == fieldName2 && eventConstant1 == eventConstant2
     = return $ Set.fromList [ rc]
   | otherwise = return Set.empty
 
-evalEvent rc (EventTo (Timer timerName1) eventConstant1)
+evalEvent env rc (EventTo (Timer timerName1) eventConstant1)
                   (EventTimer timerName2 _ eventConstant2)
-  | timerName1 == timerName2 && eventConstant1 == eventConstant2
+  | areNamesEqual env timerName1 timerName2 && eventConstant1 == eventConstant2
     = return $ Set.fromList [ rc]
   | otherwise = return Set.empty
 
 -- for EventFrom
-evalEvent rc (EventFrom (Field devName1 fieldName1) eventConstant1)
+evalEvent env rc (EventFrom (Field devName1 fieldName1) eventConstant1)
                   (EventField devName2 fieldName2 eventConstant2 _)
-  | devName1 == devName2 && fieldName1 == fieldName2 && eventConstant1 == eventConstant2
+  | areNamesEqual env devName1 devName2
+    && fieldName1 == fieldName2 && eventConstant1 == eventConstant2
     = return $ Set.fromList [ rc]
   | otherwise = return Set.empty
 
-evalEvent rc (EventFrom (Timer timerName1) eventConstant1)
+evalEvent env rc (EventFrom (Timer timerName1) eventConstant1)
                   (EventTimer timerName2 eventConstant2 _)
-  | timerName1 == timerName2 && eventConstant1 == eventConstant2
+  | areNamesEqual env timerName1 timerName2 && eventConstant1 == eventConstant2
     = return $ Set.fromList [ rc ]
   | otherwise = return Set.empty
 
 -- for EventFromTo
-evalEvent rc (EventFromTo (Field devName1 fieldName1) eventConstant1 eventConstant1')
+evalEvent env rc (EventFromTo (Field devName1 fieldName1) eventConstant1 eventConstant1')
                   (EventField devName2 fieldName2 eventConstant2 eventConstant2')
-  | devName1 == devName2 && fieldName1 == fieldName2 
+  | areNamesEqual env devName1 devName2 && fieldName1 == fieldName2 
     && eventConstant1 == eventConstant2 && eventConstant1' == eventConstant2'
     = return $ Set.fromList [ rc ]
   | otherwise = return Set.empty
 
-evalEvent rc (EventFromTo (Timer timerName1) eventConstant1 eventConstant1')
+evalEvent env rc (EventFromTo (Timer timerName1) eventConstant1 eventConstant1')
                   (EventTimer timerName2 eventConstant2 eventConstant2')
-  | timerName1 == timerName2 && eventConstant1 == eventConstant2 
+  | areNamesEqual env timerName1 timerName2 && eventConstant1 == eventConstant2 
     && eventConstant1' == eventConstant2'
     = return $ Set.fromList [ rc]
   | otherwise = return Set.empty
 
 -- forGroupEvent
-evalEvent (_, EMCA (GroupEvent {}) _) _ _ = error "evalEvent over GroupEvent: not implemented"
+evalEvent _ (_, EMCA (GroupEvent {}) _) _ _ = error "evalEvent over GroupEvent: not implemented"
 
-evalEvent _ evH event = error $ "evalEvent: " ++ show evH ++ " over " ++ show event
+evalEvent _ _ evH event = error $ "evalEvent: " ++ show evH ++ " over " ++ show event
 
 
 ------------------------------------------------------------------------------------------
@@ -398,8 +408,12 @@ evalAction env state (CommandAction (Field dev attr) e) =
   do  litFrom <- eval env state (Field dev attr)
       litTo <- eval env state e
       let event = EventField dev attr litFrom litTo
-      state' <- doCmd dev attr litTo state
-      return (state', Set.singleton event)
+      
+      case Map.lookup dev env of
+	Nothing -> error $ "evalAction: not found in the environment " ++ dev
+	Just dev' -> 
+          do state' <- doCmd dev' attr litTo state
+             return (state', Set.singleton event)
 
 evalAction _ _ (CommandAction _ e) = error $ "evalAction: CommandAction is not implemented"
 
@@ -457,7 +471,7 @@ eval env state (PredicateExpression p) = satisfied env state p
 evalIdentifier :: Environment -> State -> String -> IO Expr.Literal
 evalIdentifier env state s = 
   case Map.lookup s env of
-    Nothing ->  error $ "evalIdentifier: " ++ s   
+    Nothing ->  return $ ConstantLiteral s -- error $ "evalIdentifier: " ++ s  -- Todo: Should type check!
     Just s' -> readInput s' state
 
 evalField :: Environment -> State -> DeviceName -> AttributeName -> IO Expr.Literal

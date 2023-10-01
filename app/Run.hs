@@ -15,6 +15,7 @@ import TokenInterface
 import Control.Monad (when)
 
 import qualified Data.Map as Map
+import qualified Data.Set as Set
 
 ------------------------------------------------------------------------
 -- | Pretty printing JSON
@@ -59,17 +60,34 @@ load fileName =
 ruleToJson :: Rule -> IO ()
 ruleToJson rule = B.putStrLn $ toJson $ rule
 
+
+------------------------------------------------------------------------------------------
 -- | Testing
+------------------------------------------------------------------------------------------
+
 test1 :: IO ()
 test1 = do
-  rule <- load ".\\examples\\turn-on-hallway-light-when-the-front-door-unlocks.iota"
-  ruleToJson rule
+  ruleText <- load "./examples/turn-on-hallway-light-when-the-front-door-unlocks.iota"
+  ruleToJson ruleText
+  rs <- installRule env1 ruleText
+  (event2, iot2) <- driverECA event1 iot1 rs
+  print "iot1:"
+  print iot1
+  print "iot2:"
+  print iot2
+  return ()
 
 env1 :: Environment
 env1 = 
   Map.fromList [
     ("front_door", "front_door@myhome"),
     ("hallway_light", "hallway_light@myhome")
+  ]
+
+event1 :: Set.Set Event
+event1 =
+  Set.fromList [
+    EventField "front_door@myhome" "lock" (ConstantLiteral "locked") (ConstantLiteral "unlocked")
   ]
 
 iot1 :: IoT
@@ -80,7 +98,7 @@ dev1 =
   Map.fromList [
     ("front_door@myhome", 
       ( "lock"
-      , Map.fromList [("lock", ConstantLiteral "locked")])),
+      , Map.fromList [("lock", ConstantLiteral "unlocked")])),
     ("hallway_light@myhome", 
       ( "switch"
       ,  Map.fromList [("switch", ConstantLiteral "off")]))
@@ -101,3 +119,4 @@ timer1 =
   Map.fromList [
   ]  
 
+------------------------------------------------------------------------------------------
