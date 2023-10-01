@@ -43,14 +43,15 @@ data EvalState =
 
 type DeclName = Name
 
-type IoT = (DeviceIoT, InputIoT, OutputIoT)
+type IoT = (DeviceIoT, InputIoT, OutputIoT, TimerIoT)
 
 type DeviceIoT = Map.Map DeviceName (Capability, Map.Map AttributeName Literal)
 type InputIoT  = Map.Map Name (ValueType, Literal)
 type OutputIoT = Map.Map Name ([ ValueType], [ Literal ])
+type TimerIoT = Map.Map Name Literal -- NumberLiteral
 
 readDev :: DeviceName -> AttributeName -> IoT -> IO Literal
-readDev dev attr (devIot, _, _) = 
+readDev dev attr (devIot, _, _,_) = 
   case Map.lookup dev devIot of
     Just (_, attrs) -> 
       case Map.lookup attr attrs of
@@ -59,33 +60,38 @@ readDev dev attr (devIot, _, _) =
     Nothing -> error $ "readDev: " ++ dev
 
 readInput :: Name -> IoT -> IO Literal
-readInput name (_, inputIot, _) = 
+readInput name (_, inputIot, _,_) = 
   case Map.lookup name inputIot of
     Just (_, lit) -> return lit
-    Nothing -> error $ "readInput: " ++ name    
+    Nothing -> error $ "readInput: " ++ name
 
 doCmd :: DeviceName -> AttributeName -> Literal -> IoT -> IO IoT
-doCmd dev attr lit (devIot, inputIot, outputIot) =     -- Implementation:   dev.attr := lit
+doCmd dev attr lit (devIot, inputIot, outputIot, timerIot) =     -- Implementation:   dev.attr := lit
   case Map.lookup dev devIot of
     Just (cap, attrs) -> 
       do let attrs' = Map.insert attr lit attrs
          let devIot' = Map.insert dev (cap, attrs') devIot
-         return (devIot', inputIot, outputIot)
-    Nothing -> return (devIot, inputIot, outputIot)
+         return (devIot', inputIot, outputIot, timerIot)
+    Nothing -> return (devIot, inputIot, outputIot, timerIot)
      
 startTimer :: TimerName -> Literal -> IoT -> IO IoT
-startTimer timerName lit (devIot, inputIot, outputIot) =     -- Implementation:   timerName := lit
-  case Map.lookup timerName devIot of
-    Just (cap, attrs) -> 
-      do let attrs' = Map.insert "timer" lit attrs -- Todo: fix hard coding!
-         let devIot' = Map.insert timerName (cap, attrs') devIot
-         return (devIot', inputIot, outputIot)
-    Nothing -> return (devIot, inputIot, outputIot)
+startTimer timerName lit (devIot, inputIot, outputIot, timerIot) =     -- Implementation:   timerName := lit
+  case Map.lookup timerName timerIot of
+    Nothing -> 
+      do let timerIot' = Map.insert timerName lit timerIot
+         return (devIot, inputIot, outputIot, timerIot')
+    Just lit1 -> error $ "startTimer: " ++ timerName ++ " is already started with " ++ show lit1
 
 stopTimer :: TimerName -> IoT -> IO IoT
-stopTimer timerName (devIot, inputIot, outputIot) =     -- Implementation:   timerName := lit
-  do let devIot' = Map.delete timerName devIot
-     return (devIot', inputIot, outputIot)
+stopTimer timerName (devIot, inputIot, outputIot, timerIot) =     -- Implementation:   timerName := lit
+  do let timerIot' = Map.delete timerName timerIot
+     return (devIot, inputIot, outputIot, timerIot')
+
+readTimer :: TimerName -> IoT -> IO Literal
+readTimer timerName (_, _, _, timerIot) = 
+  case Map.lookup timerName timerIot of
+    Just lit -> return lit
+    Nothing -> error $ "readTimer: " ++ timerName     
 
 
 ------------------------------------------------------------------------------------------
@@ -478,9 +484,11 @@ evalField env state devName fieldName =
     Just devName' -> readDev devName' fieldName state
 
 evalTimer :: Environment -> State -> TimerName -> IO Expr.Literal
-evalTimer env deviceState timerName =
-  evalField env deviceState timerName "timer"  -- Todo: fix this hard coding!
-  
+evalTimer env state timerName =
+  case Map.lookup timerName env of
+    Nothing -> error $ "evalTimer: " ++ timerName
+    Just timerName' -> readTimer timerName' state
+
 
 -- | Utilities
 
