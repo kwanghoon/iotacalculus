@@ -66,6 +66,7 @@
  ProductionRule "Action" [Terminal "identifier", Terminal "(", Nonterminal "OneOrMoreAdditiveExprs", Terminal ")"],
  ProductionRule "Action" [Terminal "start", Terminal "identifier", Terminal "at", Nonterminal "AdditiveExpr"],
  ProductionRule "Action" [Terminal "stop", Terminal "identifier"],
+ ProductionRule "Action" [Terminal "tick", Terminal "identifier"],
  ProductionRule "Action" [Terminal "map", Nonterminal "Group", Terminal "(", Terminal "identifier", Terminal "->", Nonterminal "Action", Terminal ")"],
  ProductionRule "OneOrMoreAdditiveExprs" [Nonterminal "AdditiveExpr"],
  ProductionRule "OneOrMoreAdditiveExprs" [Nonterminal "AdditiveExpr", Terminal ",", Nonterminal "OneOrMoreAdditiveExprs"],

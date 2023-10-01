@@ -378,6 +378,11 @@ parserSpec = ParserSpec
 	          in  return $ toASTAction $ StopTimer name
 	), 
 
+      rule "Action -> tick identifier"
+        ( \rhs -> let name = getText rhs 2
+	          in  return $ toASTAction $ TickTimer name
+	), 
+
       rule "Action -> map Group ( identifier -> Action )"
         ( \rhs -> let group = fromASTGroup $ get rhs 2
 	              varName = getText rhs 4

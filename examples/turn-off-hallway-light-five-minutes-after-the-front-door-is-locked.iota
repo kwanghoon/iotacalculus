@@ -3,11 +3,19 @@ rules "Turn off the hallway light five minutes after the door locks"
   device hallway_light : switch ;
   timer light_timer;
 
-  rule "start a timer when the door locks."
+  rule "start a timer when the door gets locked."
 
     front_door.lock [ unlocked ~> ] ;    // event handler
     front_door.lock == locked ;        // condition
     start light_timer at 0              // action
+
+  end
+
+  rule "increment the timer."
+
+    light_timer[. ~> ];           // event handler
+    light_timer < 5;              // condition
+    tick light_timer              // actions
 
   end
 

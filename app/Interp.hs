@@ -60,11 +60,13 @@ readDev dev attr (devIot, _, _,_) =
         Nothing -> error $ "readDev: " ++ attr
     Nothing -> error $ "readDev: " ++ dev
 
-readInput :: Name -> IoT -> IO Literal
-readInput name (_, inputIot, _,_) = 
+readInputOrTimer :: Name -> IoT -> IO Literal
+readInputOrTimer name (_, inputIot, _, timerIot) = 
   case Map.lookup name inputIot of
     Just (_, lit) -> return lit
-    Nothing -> error $ "readInput: " ++ name
+    Nothing -> case Map.lookup name timerIot of
+                Just lit -> return lit
+		Nothing -> error $ "readInputOrTimer: " ++ name
 
 doCmd :: DeviceName -> AttributeName -> Literal -> IoT -> IO IoT
 doCmd dev attr lit (devIot, inputIot, outputIot, timerIot) =     -- Implementation:   dev.attr := lit
@@ -84,9 +86,15 @@ startTimer timerName lit (devIot, inputIot, outputIot, timerIot) =     -- Implem
     Just lit1 -> error $ "startTimer: " ++ timerName ++ " is already started with " ++ show lit1
 
 stopTimer :: TimerName -> IoT -> IO IoT
-stopTimer timerName (devIot, inputIot, outputIot, timerIot) =     -- Implementation:   timerName := lit
+stopTimer timerName (devIot, inputIot, outputIot, timerIot) =     -- Implementation:   stop timerName 
   do let timerIot' = Map.delete timerName timerIot
      return (devIot, inputIot, outputIot, timerIot')
+
+tickTimer :: TimerName -> IoT -> IO IoT
+tickTimer timerName (devIot, inputIot, outputIot, timerIot) =     -- Implementation:   tick timerName
+  case Map.lookup timerName timerIot of
+    Just lit -> return (devIot, inputIot, outputIot, Map.insert timerName (addition lit (NumberLiteral 1)) timerIot)
+    Nothing -> error $ "tickTimer: " ++ timerName
 
 readTimer :: TimerName -> IoT -> IO Literal
 readTimer timerName (_, _, _, timerIot) = 
@@ -114,23 +122,24 @@ installRule env (LeafRule _ _ emca) =
 
 driverECA :: Set.Set Event -> State -> Ruleset -> IO (Set.Set Event, State)
 driverECA eventSet state ruleset =
-  do  (maybeEvent, eventSet, state, status) <- driverNoneEvalState eventSet state ruleset
+  do  (maybeEvent, eventSet', state', status) <- driverNoneEvalState eventSet state ruleset
       case status of
         NoneEvalState -> 
-          if Set.null eventSet then  -- terminal condition! Note maybeEvent must be Nothing.
-              return (eventSet, state)
-          else driverECA eventSet state ruleset
+          if Set.null eventSet' then  -- terminal condition! Note maybeEvent must be Nothing.
+              return (eventSet', state')
+	      
+          else driverECA eventSet' state' ruleset
         _ -> let event = Maybe.fromJust maybeEvent in
              do (_, _, _, rulesetIn1, rulesetOut1) <- 
-                  driverEventEvalState event eventSet state ruleset Set.empty
+                  driverEventEvalState event eventSet' state' ruleset Set.empty
 
                 (_, _, _, rulesetIn2, rulesetOut2) <-
-                  driverPredEvalState event eventSet state rulesetIn1 rulesetOut1
+                  driverPredEvalState event eventSet' state' rulesetIn1 rulesetOut1
 
-                (_, eventSet', state', _) <-
-                  driverActEvalState event eventSet state rulesetIn2 rulesetOut2
+                (_, eventSet'', state'', _) <-
+                  driverActEvalState event eventSet' state' rulesetIn2 rulesetOut2
 
-                driverECA eventSet' state' ruleset
+                driverECA eventSet'' state'' ruleset
 
 ------------------------------------------------------------------------------------------
 -- | (R-E) rule event
@@ -230,7 +239,7 @@ driverActEvalState event eventSet state rulesetIn rulesetOut =
      case status of
       NoneEvalState -> return (maybeEvent, eventSet', state', status)
       ActEvalState rulesetIn' rulesetOut' -> 
-        driverActEvalState event eventSet state' rulesetIn' rulesetOut' 
+        driverActEvalState event eventSet' state' rulesetIn' rulesetOut' 
 
 ------------------------------------------------------------------------------------------
 -- | evalEvent:
@@ -249,7 +258,8 @@ evalEvent env rc (JustEvent (Field devName1 fieldName1))
 
 evalEvent env rc (JustEvent (Timer timerName)) 
                   (EventTimer timerName' _ _)
-  | areNamesEqual env timerName timerName' = return $ Set.fromList [ rc]
+  | areNamesEqual env timerName timerName' =
+     do return $ Set.fromList [ rc]
   | otherwise = return Set.empty
 
 -- for EventTo
@@ -271,7 +281,7 @@ evalEvent env rc (EventFrom (Field devName1 fieldName1) eventConstant1)
                   (EventField devName2 fieldName2 eventConstant2 _)
   | areNamesEqual env devName1 devName2
     && fieldName1 == fieldName2 && eventConstant1 == eventConstant2
-    = return $ Set.fromList [ rc]
+    = return $ Set.fromList [ rc ]
   | otherwise = return Set.empty
 
 evalEvent env rc (EventFrom (Timer timerName1) eventConstant1)
@@ -298,7 +308,7 @@ evalEvent env rc (EventFromTo (Timer timerName1) eventConstant1 eventConstant1')
 -- forGroupEvent
 evalEvent _ (_, EMCA (GroupEvent {}) _) _ _ = error "evalEvent over GroupEvent: not implemented"
 
-evalEvent _ _ evH event = error $ "evalEvent: " ++ show evH ++ " over " ++ show event
+evalEvent _ _ evH event = return Set.empty
 
 
 ------------------------------------------------------------------------------------------
@@ -423,15 +433,31 @@ evalAction env state (OutputAction n es) =
       return (state, Set.empty)
 
 evalAction env state (StartTimer t e) = 
-  do  lit <- eval env state e
-      let timerTo = addition lit (NumberLiteral 1)
-      let timerEvent = EventTimer t lit timerTo
-      state' <- startTimer t timerTo state
-      return (state', Set.singleton timerEvent)
+  case Map.lookup t env of
+    Nothing -> error $ "evalAction timer: not found in the environment :" ++ t
+    Just t' ->
+      do lit <- eval env state e
+	 let timerTo = addition lit (NumberLiteral 1)
+	 let timerEvent = EventTimer t' lit timerTo
+	 state' <- startTimer t' timerTo state
+	 return (state', Set.singleton timerEvent)
 
-evalAction _ state (StopTimer t) = 
-  do  state' <- stopTimer t state
-      return (state', Set.empty)
+evalAction env state (StopTimer t) = 
+  case Map.lookup t env of
+    Nothing -> error $ "evalAction timer: not found in the environment :" ++ t
+    Just t' ->
+      do  state' <- stopTimer t' state
+	  return (state', Set.empty)
+
+evalAction env state (TickTimer t) = 
+  case Map.lookup t env of
+    Nothing -> error $ "evalAction timer: not found in the environment :" ++ t
+    Just t' ->
+      do  litFrom <- readTimer t' state
+          state' <- tickTimer t' state
+	  litTo <- readTimer t' state'
+	  let timerEvent = EventTimer t' litFrom litTo
+	  return (state', Set.singleton timerEvent)
 
 evalAction _ _ _ = error $ "evalAction: MapAction is not implemented"
 
@@ -472,7 +498,7 @@ evalIdentifier :: Environment -> State -> String -> IO Expr.Literal
 evalIdentifier env state s = 
   case Map.lookup s env of
     Nothing ->  return $ ConstantLiteral s -- error $ "evalIdentifier: " ++ s  -- Todo: Should type check!
-    Just s' -> readInput s' state
+    Just s' -> readInputOrTimer s' state
 
 evalField :: Environment -> State -> DeviceName -> AttributeName -> IO Expr.Literal
 evalField env state devName fieldName =

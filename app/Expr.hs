@@ -204,6 +204,7 @@ data Action =
   | OutputAction Name [ Expression ]
   | StartTimer TimerName Expression
   | StopTimer TimerName
+  | TickTimer TimerName
   | MapAction Group BoundVariable Action
   deriving (Show, Generic, Ord, Eq)
 
@@ -214,6 +215,7 @@ instance ToJSON Action where
   toJSON (OutputAction n es) = object [fromString "OutputAction" .= (n, es)]
   toJSON (StartTimer t e) = object [fromString "StartTimer" .= (t, e)]
   toJSON (StopTimer t) = object [fromString "StopTimer" .= t]
+  toJSON (TickTimer t) = object [fromString "TickTimer" .= t]
   toJSON (MapAction g b a) = object [fromString "MapAction" .= (g, b, a)]
 
 type Group = [ DeviceName ]

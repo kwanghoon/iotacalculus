@@ -17,6 +17,7 @@ data Token =
   | FALSE
   | START
   | STOP
+  | TICK
   | AT
   | IDENTIFIER
   | OPENBRACKET
@@ -106,6 +107,7 @@ keywords =
     (FALSE, "false"),
     (START, "start"),
     (STOP, "stop"),
+    (TICK, "tick"),
     (AT, "at"),
     (IDENTIFIER, "identifier"),
     (DEVICE, "device"),
