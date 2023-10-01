@@ -13,7 +13,7 @@ data Event =
   | EventTimer TimerName EventConstant EventConstant
   deriving (Eq, Ord, Show)
 
-type State = Map.Map DeviceName (Map.Map Expr.AttributeName Expr.Literal)
+type State = IoT -- Map.Map DeviceName (Map.Map Expr.AttributeName Expr.Literal)
 
 -- | Environments
 type Environment = Map.Map DeclName Name  -- Device, Input, and Output declaration environments!!
@@ -49,7 +49,45 @@ type DeviceIoT = Map.Map DeviceName (Capability, Map.Map AttributeName Literal)
 type InputIoT  = Map.Map Name (ValueType, Literal)
 type OutputIoT = Map.Map Name ([ ValueType], [ Literal ])
 
-{-
+readDev :: DeviceName -> AttributeName -> IoT -> IO Literal
+readDev dev attr (devIot, _, _) = 
+  case Map.lookup dev devIot of
+    Just (_, attrs) -> 
+      case Map.lookup attr attrs of
+        Just lit -> return lit
+        Nothing -> error $ "readDev: " ++ attr
+    Nothing -> error $ "readDev: " ++ dev
+
+readInput :: Name -> IoT -> IO Literal
+readInput name (_, inputIot, _) = 
+  case Map.lookup name inputIot of
+    Just (_, lit) -> return lit
+    Nothing -> error $ "readInput: " ++ name    
+
+doCmd :: DeviceName -> AttributeName -> Literal -> IoT -> IO IoT
+doCmd dev attr lit (devIot, inputIot, outputIot) =     -- Implementation:   dev.attr := lit
+  case Map.lookup dev devIot of
+    Just (cap, attrs) -> 
+      do let attrs' = Map.insert attr lit attrs
+         let devIot' = Map.insert dev (cap, attrs') devIot
+         return (devIot', inputIot, outputIot)
+    Nothing -> return (devIot, inputIot, outputIot)
+     
+startTimer :: TimerName -> Literal -> IoT -> IO IoT
+startTimer timerName lit (devIot, inputIot, outputIot) =     -- Implementation:   timerName := lit
+  case Map.lookup timerName devIot of
+    Just (cap, attrs) -> 
+      do let attrs' = Map.insert "timer" lit attrs -- Todo: fix hard coding!
+         let devIot' = Map.insert timerName (cap, attrs') devIot
+         return (devIot', inputIot, outputIot)
+    Nothing -> return (devIot, inputIot, outputIot)
+
+stopTimer :: TimerName -> IoT -> IO IoT
+stopTimer timerName (devIot, inputIot, outputIot) =     -- Implementation:   timerName := lit
+  do let devIot' = Map.delete timerName devIot
+     return (devIot', inputIot, outputIot)
+
+
 ------------------------------------------------------------------------------------------
 -- | Driver
 ------------------------------------------------------------------------------------------
@@ -68,7 +106,7 @@ installDecl :: IoT -> Environment -> Decl -> IO Environment
 installDecl iot env (DeviceDecl n cap) =
   do putStrLn n
      putStrLn cap
-     putStrLn (show iot)
+     print iot
      name <- getLine
      return $ Map.insert n name env
      
@@ -371,9 +409,7 @@ evalAction env state (CommandAction (Field dev attr) e) =
   do  litFrom <- eval env state (Field dev attr)
       litTo <- eval env state e
       let event = EventField dev attr litFrom litTo
-      let state' = Map.insert dev 
-                    (Map.insert attr litTo 
-                      (Maybe.fromMaybe Map.empty (Map.lookup dev state))) state
+      state' <- doCmd dev attr litTo state
       return (state', Set.singleton event)
 
 evalAction _ _ (CommandAction _ e) = error $ "evalAction: CommandAction is not implemented"
@@ -387,11 +423,11 @@ evalAction env state (StartTimer t e) =
   do  lit <- eval env state e
       let timerTo = addition lit (NumberLiteral 1)
       let timerEvent = EventTimer t lit timerTo
-      let timerState = Map.fromList [("timer", timerTo)]  -- Fix: hard coding!
-      return (Map.insert t timerState state , Set.singleton timerEvent)
+      state' <- startTimer t timerTo state
+      return (state', Set.singleton timerEvent)
 
 evalAction _ state (StopTimer t) = 
-  do  let state' = Map.delete t state
+  do  state' <- stopTimer t state
       return (state', Set.empty)
 
 evalAction _ _ _ = error $ "evalAction: MapAction is not implemented"
@@ -424,30 +460,27 @@ eval env state (Division e1 e2) = division <$> eval env state e1 <*> eval env st
 eval env state (MinusSign e) = minusSign <$> eval env state e
 eval env state (Negate e) = Interp.negate <$> eval env state e
 eval env state (LiteralExpression l) = return l
-eval env state (IdentifierExpression s) = evalIdentifier env s
-eval env state (Field devName fieldName) = evalField state devName fieldName
-eval env state (Timer timerName) = evalTimer state timerName
+eval env state (IdentifierExpression s) = evalIdentifier env state s
+eval env state (Field devName fieldName) = evalField env state devName fieldName
+eval env state (Timer timerName) = evalTimer env state timerName
 eval env state (PredicateExpression p) = satisfied env state p
 
-evalIdentifier :: Environment -> String -> IO Expr.Literal
-evalIdentifier environment s = 
-  case Map.lookup s environment of
-    Just (lit, _) -> return lit
-    Nothing ->  error $ "evalIdentifier: " ++ s    
+evalIdentifier :: Environment -> State -> String -> IO Expr.Literal
+evalIdentifier env state s = 
+  case Map.lookup s env of
+    Nothing ->  error $ "evalIdentifier: " ++ s   
+    Just s' -> readInput s' state
 
-evalField :: State -> DeviceName -> AttributeName -> IO Expr.Literal
-evalField deviceState devName fieldName = 
-  case Map.lookup devName deviceState of
-    Just attrs -> 
-      case Map.lookup fieldName attrs of
-        Just lit -> return lit
-        Nothing -> error $ "evalField: " ++ fieldName
+evalField :: Environment -> State -> DeviceName -> AttributeName -> IO Expr.Literal
+evalField env state devName fieldName =
+  case Map.lookup devName env of
     Nothing -> error $ "evalField: " ++ devName
+    Just devName' -> readDev devName' fieldName state
 
-evalTimer :: State -> TimerName -> IO Expr.Literal
-evalTimer deviceState timerName = 
-  evalField deviceState timerName "timer"  -- Todo: fix this hard coding!
-
+evalTimer :: Environment -> State -> TimerName -> IO Expr.Literal
+evalTimer env deviceState timerName =
+  evalField env deviceState timerName "timer"  -- Todo: fix this hard coding!
+  
 
 -- | Utilities
 
@@ -482,4 +515,3 @@ revDisjointUnionForList list =
   where
     f [] _         = []
     f (e:es) prev  = (e, prev ++ es) : f es (prev ++ [e])
--}
