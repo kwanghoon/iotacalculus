@@ -1,7 +1,7 @@
 rules "Turn off the hallway light five minutes after the door locks"
   device front_door : lock;
   device hallway_light : switch ;
-  device light_timer : timer;
+  timer light_timer;
 
   rule "start a timer when the door locks."
 

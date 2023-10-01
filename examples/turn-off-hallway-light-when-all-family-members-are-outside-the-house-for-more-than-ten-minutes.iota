@@ -4,20 +4,22 @@ rules "Turn off the hallway light when all family members' smartphones have been
   device dad_phone : locationMode ;
   device child_phone : locationMode ;
   device hallway_light : switch;
+  timer light_timer;
 
   rule "Start a timer when all family members' smartphones have been outside the house geofence"
     any {mom_phone, dad_phone, child_phone}
         (phone -> phone.mode [ . ~> ]) ; // location mode
     all {mom_phone, dad_phone, child_phone}
         (phone -> phone.mode == away);  // location mode
-    timer := 0
+    start light_timer at 0
   end
 
   rule "Turn off the hallway light when when all family members' smartphones have been outside the house geofence and the timer reaches 10 minutes"
-    timer[. ~> 10] ;
+    light_timer[. ~> 10] ;
     all {mom_phone, dad_phone, child_phone}
         (phone -> phone.mode == away) ; // location mode
-    hallway_light.switch := off	
+    hallway_light.switch := off,
+    stop light_timer
   end
 
 end

@@ -46,6 +46,7 @@ data Decl =
     DeviceDecl Name Capability
   | InputDecl Name ValueType
   | OutputDecl Name [ ValueType ]
+  | TimerDecl Name
   deriving (Show, Generic)
 
 instance FromJSON Decl
@@ -54,6 +55,7 @@ instance ToJSON Decl where
   toJSON (DeviceDecl n c) = object [fromString "DeviceDecl" .= (n, c)]
   toJSON (InputDecl n vt) = object [fromString "InputDecl" .= (n, vt)]
   toJSON (OutputDecl n vts) = object [fromString "OutputDecl" .= (n, vts)]
+  toJSON (TimerDecl n) = object [fromString "TimerDecl" .= n]
 
 type Decls = [ Decl ]
 

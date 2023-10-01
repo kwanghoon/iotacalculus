@@ -49,6 +49,7 @@ data Token =
   | DEVICE
   | INPUT
   | OUTPUT
+  | TIMER
   deriving (Eq, Show)
 
 tokenStrList :: [(Token,String)]
@@ -109,7 +110,8 @@ keywords =
     (IDENTIFIER, "identifier"),
     (DEVICE, "device"),
     (INPUT, "input"),
-    (OUTPUT, "output")
+    (OUTPUT, "output"),
+    (TIMER, "timer")
   ]
 
 findTok :: Token -> [(Token, String)] -> Maybe String
