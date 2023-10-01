@@ -24,12 +24,10 @@ eventHandler :: RuleClosure -> EventHandler
 eventHandler (_, emca) = Expr.eventHandler emca
 
 -- | Rule sets
-type Ruleset = Map.Map Integer RuleClosure
+type Ruleset = Set.Set RuleClosure
 
 type RulesetIn = Ruleset
 type RulesetOut = Ruleset
-
-type IndexedRuleClosure = (Integer, RuleClosure) -- (index, rule closure)
 
 data EvalState =
    NoneEvalState  -- Note: Ruleset is remmoved from this state.
@@ -98,25 +96,13 @@ readTimer timerName (_, _, _, timerIot) =
 -- | Driver
 ------------------------------------------------------------------------------------------
 
-installRule :: IoT -> Environment -> Rule -> IO Ruleset
-installRule iot env (NodeRule _ decls rs) = 
-  do env' <- foldM (installDecl iot) env decls
-     rsList <- mapM (installRule iot env') rs
-     return $ foldl Map.union Map.empty rsList
+installRule :: Environment -> Rule -> IO Ruleset
+installRule env (NodeRule _ _ rs) =
+  do rsList <- mapM (installRule env) rs
+     return $ foldl Set.union Set.empty rsList
 
-installRule iot env (LeafRule _ decls emca) =
-  do env' <- foldM (installDecl iot) env decls
-     return $ Map.fromList [ (0, (env', emca)) ]
-
-installDecl :: IoT -> Environment -> Decl -> IO Environment
-installDecl iot env (DeviceDecl n cap) =
-  do putStrLn n
-     putStrLn cap
-     print iot
-     name <- getLine
-     return $ Map.insert n name env
-     
-installDecl _ env _ = return env -- Todo: do something!
+installRule env (LeafRule _ _ emca) =
+  do return $ Set.fromList [ (env, emca) ]
 
 driverECA :: Set.Set Event -> State -> Ruleset -> IO (Set.Set Event, State)
 driverECA eventSet state ruleset =
@@ -128,7 +114,7 @@ driverECA eventSet state ruleset =
           else driverECA eventSet state ruleset
         _ -> let event = Maybe.fromJust maybeEvent in
              do (_, _, _, rulesetIn1, rulesetOut1) <- 
-                  driverEventEvalState event eventSet state ruleset Map.empty
+                  driverEventEvalState event eventSet state ruleset Set.empty
 
                 (_, _, _, rulesetIn2, rulesetOut2) <-
                   driverPredEvalState event eventSet state rulesetIn1 rulesetOut1
@@ -151,7 +137,7 @@ evalREvent eventSet state ruleset
 
  | otherwise =
     do (e, es) <- revDisjointUnion eventSet    -- eventSet = { e } U es
-       return (Maybe.Just e, es, state, EventEvalState ruleset Map.empty)
+       return (Maybe.Just e, es, state, EventEvalState ruleset Set.empty)
 
 driverNoneEvalState eventSet state ruleset = evalREvent eventSet state ruleset
 
@@ -164,14 +150,13 @@ evalRHandleEvent
       -> IO (Event, Set.Set Event, State, EvalState)
 evalRHandleEvent event eventSet state rulesetIn rulesetOut
 
- | Map.null rulesetIn =
-     return (event, eventSet, state, PredEvalState rulesetOut Map.empty)
+ | Set.null rulesetIn =
+     return (event, eventSet, state, PredEvalState rulesetOut Set.empty)
 
  | otherwise =
-     do (indexedRule, rs1) <- revDisjointUnionMap rulesetIn
-        let (idx, rule) = indexedRule
-        rs <- evalEvent idx rule (Interp.eventHandler rule) event
-        return (event, eventSet, state, EventEvalState rs1 (Map.union rs rulesetOut))
+     do (rule, rs1) <- revDisjointUnion rulesetIn
+        rs <- evalEvent rule (Interp.eventHandler rule) event
+        return (event, eventSet, state, EventEvalState rs1 (Set.union rs rulesetOut))
 
 
 driverEventEvalState event eventSet state rulesetIn rulesetOut =
@@ -192,14 +177,13 @@ evalRPredicate
       -> IO (Event, Set.Set Event, State, EvalState)
 evalRPredicate event eventSet state rulesetIn rulesetOut
 
-  | Map.null rulesetIn =
-      return (event, eventSet, state, ActEvalState rulesetOut Map.empty)
+  | Set.null rulesetIn =
+      return (event, eventSet, state, ActEvalState rulesetOut Set.empty)
 
   | otherwise =
-      do  (indexedRule, rs1) <- revDisjointUnionMap rulesetIn
-          let (idx, rule) = indexedRule
-          rs <- evalPredicate idx rule state
-          return (event, eventSet, state, PredEvalState rs1 (Map.union rs rulesetOut))
+      do  (rule, rs1) <- revDisjointUnion rulesetIn
+          rs <- evalPredicate rule state
+          return (event, eventSet, state, PredEvalState rs1 (Set.union rs rulesetOut))
 
 driverPredEvalState event eventSet state rulesetIn rulesetOut =
   do (_, _, _, status) <- evalRPredicate event eventSet state rulesetIn rulesetOut
@@ -223,16 +207,15 @@ evalRAction
       -> IO (Maybe Event, Set.Set Event, State, EvalState)
 evalRAction event eventSet state rulesetIn rulesetOut
 
-   | Map.null rulesetIn =
+   | Set.null rulesetIn =
        return (Maybe.Nothing, eventSet, state, NoneEvalState) -- Note ruleset is removed from NoneEvalState.
 
    | otherwise =
-       do (indexedRule, rs1) <- revDisjointUnionMap rulesetIn
-          let (idx, rule) = indexedRule
-          (state', eventSet') <- evalActionFrom idx rule state
+       do (rule, rs1) <- revDisjointUnion rulesetIn
+          (state', eventSet') <- evalActionFrom rule state
           return (Maybe.Just event, 
                     Set.union eventSet eventSet', state', 
-                      ActEvalState rs1 (Map.union (Map.fromList [indexedRule]) rulesetOut))
+                      ActEvalState rs1 (Set.union (Set.fromList [rule]) rulesetOut))
 
 driverActEvalState event eventSet state rulesetIn rulesetOut =
   do (maybeEvent, eventSet', state', status) <- evalRAction event eventSet state rulesetIn rulesetOut
@@ -247,65 +230,65 @@ driverActEvalState event eventSet state rulesetIn rulesetOut =
 -- |   Note that the 3rd argument is one extracted from the 2nd argument.
 ------------------------------------------------------------------------------------------
 
-evalEvent :: Integer -> RuleClosure -> EventHandler -> Event -> IO Ruleset
+evalEvent :: RuleClosure -> EventHandler -> Event -> IO Ruleset
 
 -- for JustEvent
-evalEvent idx rc (JustEvent (Field devName1 fieldName1)) 
+evalEvent rc (JustEvent (Field devName1 fieldName1)) 
                   (EventField devName2 fieldName2 _ _)
   | devName1 == devName2 && fieldName1 == fieldName2
-    = return $ Map.fromList [ (idx, rc)]
-  | otherwise = return Map.empty
+    = return $ Set.fromList [ rc]
+  | otherwise = return Set.empty
 
-evalEvent idx rc (JustEvent (Timer timerName)) 
+evalEvent rc (JustEvent (Timer timerName)) 
                   (EventTimer timerName' _ _)
-  | timerName == timerName' = return $ Map.fromList [ (idx, rc)]
-  | otherwise = return Map.empty
+  | timerName == timerName' = return $ Set.fromList [ rc]
+  | otherwise = return Set.empty
 
 -- for EventTo
-evalEvent idx rc (EventTo (Field devName1 fieldName1) eventConstant1)
+evalEvent rc (EventTo (Field devName1 fieldName1) eventConstant1)
                   (EventField devName2 fieldName2 _ eventConstant2)
   | devName1 == devName2 && fieldName1 == fieldName2 && eventConstant1 == eventConstant2
-    = return $ Map.fromList [ (idx, rc)]
-  | otherwise = return Map.empty
+    = return $ Set.fromList [ rc]
+  | otherwise = return Set.empty
 
-evalEvent idx rc (EventTo (Timer timerName1) eventConstant1)
+evalEvent rc (EventTo (Timer timerName1) eventConstant1)
                   (EventTimer timerName2 _ eventConstant2)
   | timerName1 == timerName2 && eventConstant1 == eventConstant2
-    = return $ Map.fromList [ (idx, rc)]
-  | otherwise = return Map.empty
+    = return $ Set.fromList [ rc]
+  | otherwise = return Set.empty
 
 -- for EventFrom
-evalEvent idx rc (EventFrom (Field devName1 fieldName1) eventConstant1)
+evalEvent rc (EventFrom (Field devName1 fieldName1) eventConstant1)
                   (EventField devName2 fieldName2 eventConstant2 _)
   | devName1 == devName2 && fieldName1 == fieldName2 && eventConstant1 == eventConstant2
-    = return $ Map.fromList [ (idx, rc)]
-  | otherwise = return Map.empty
+    = return $ Set.fromList [ rc]
+  | otherwise = return Set.empty
 
-evalEvent idx rc (EventFrom (Timer timerName1) eventConstant1)
+evalEvent rc (EventFrom (Timer timerName1) eventConstant1)
                   (EventTimer timerName2 eventConstant2 _)
   | timerName1 == timerName2 && eventConstant1 == eventConstant2
-    = return $ Map.fromList [ (idx, rc)]
-  | otherwise = return Map.empty
+    = return $ Set.fromList [ rc ]
+  | otherwise = return Set.empty
 
 -- for EventFromTo
-evalEvent idx rc (EventFromTo (Field devName1 fieldName1) eventConstant1 eventConstant1')
+evalEvent rc (EventFromTo (Field devName1 fieldName1) eventConstant1 eventConstant1')
                   (EventField devName2 fieldName2 eventConstant2 eventConstant2')
   | devName1 == devName2 && fieldName1 == fieldName2 
     && eventConstant1 == eventConstant2 && eventConstant1' == eventConstant2'
-    = return $ Map.fromList [ (idx, rc)]
-  | otherwise = return Map.empty
+    = return $ Set.fromList [ rc ]
+  | otherwise = return Set.empty
 
-evalEvent idx rc (EventFromTo (Timer timerName1) eventConstant1 eventConstant1')
+evalEvent rc (EventFromTo (Timer timerName1) eventConstant1 eventConstant1')
                   (EventTimer timerName2 eventConstant2 eventConstant2')
   | timerName1 == timerName2 && eventConstant1 == eventConstant2 
     && eventConstant1' == eventConstant2'
-    = return $ Map.fromList [ (idx, rc)]
-  | otherwise = return Map.empty
+    = return $ Set.fromList [ rc]
+  | otherwise = return Set.empty
 
 -- forGroupEvent
-evalEvent _ (_, EMCA (GroupEvent {}) _) _ _ = error "evalEvent over GroupEvent: not implemented"
+evalEvent (_, EMCA (GroupEvent {}) _) _ _ = error "evalEvent over GroupEvent: not implemented"
 
-evalEvent _ _ evH event = error $ "evalEvent: " ++ show evH ++ " over " ++ show event
+evalEvent _ evH event = error $ "evalEvent: " ++ show evH ++ " over " ++ show event
 
 
 ------------------------------------------------------------------------------------------
@@ -314,14 +297,14 @@ evalEvent _ _ evH event = error $ "evalEvent: " ++ show evH ++ " over " ++ show 
 -- |
 -- |  Note that the returned rule set is the firstly matched E-C-A from the EMCA.
 ------------------------------------------------------------------------------------------
-evalPredicate :: Integer -> RuleClosure -> State -> IO Ruleset
-evalPredicate idx (env, EMCA eh mpas) state = 
+evalPredicate :: RuleClosure -> State -> IO Ruleset
+evalPredicate (env, EMCA eh mpas) state = 
   do  sats <- mapM (\ (p, _) -> satisfied env state p) mpas
       case sats of
-        [] -> return Map.empty
+        [] -> return Set.empty
         bList -> case [ pas | (b,pas) <- zip bList mpas, isTrueLiteral b] of
-                    [] -> return Map.empty
-                    (pas:_) -> return (Map.fromList [(idx, (env, EMCA eh [pas]))])
+                    [] -> return Set.empty
+                    (pas:_) -> return (Set.fromList [(env, EMCA eh [pas])])
                           -- Todo: What is meant by idx here??
                           --       It seems that the idx is not used in the following evalAction.
                           --       This is because of the definition of Ruleset, which is 
@@ -398,9 +381,9 @@ greaterThanOrEqualTo e1 e2 = error $ "Unexpected operands in greaterThanOrEqualT
 -- | evalAction:
 -- | [[ r ]]_a sigma = 
 ------------------------------------------------------------------------------------------
-evalActionFrom :: Integer -> RuleClosure -> State -> IO (State, Set.Set Event)
-evalActionFrom _ (env, EMCA _ [(_, actions)]) state = evalActions env state actions
-evalActionFrom _ _ _ = error $ "evalActionFrom: unexpected configuration of EMCA"
+evalActionFrom :: RuleClosure -> State -> IO (State, Set.Set Event)
+evalActionFrom (env, EMCA _ [(_, actions)]) state = evalActions env state actions
+evalActionFrom _ _ = error $ "evalActionFrom: unexpected configuration of EMCA"
 
 
 evalActions :: Environment -> State -> Actions -> IO (State, Set.Set Event)

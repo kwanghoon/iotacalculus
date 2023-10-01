@@ -8,6 +8,8 @@ import Expr
 import Lexer
 import Parser
 
+import Interp
+
 import TokenInterface
 
 import Control.Monad (when)
@@ -63,8 +65,18 @@ test1 = do
   rule <- load ".\\examples\\turn-on-hallway-light-when-the-front-door-unlocks.iota"
   ruleToJson rule
 
-things1 :: Map.Map Name (Capability, Map.Map AttributeName Literal)
-things1 = 
+env1 :: Environment
+env1 = 
+  Map.fromList [
+    ("front_door", "front_door@myhome"),
+    ("hallway_light", "hallway_light@myhome")
+  ]
+
+iot1 :: IoT
+iot1 = (dev1, input1, output1, timer1)
+
+dev1 :: Map.Map Name (Capability, Map.Map AttributeName Literal)
+dev1 = 
   Map.fromList [
     ("front_door@myhome", 
       ( "lock"
@@ -83,4 +95,9 @@ output1 :: Map.Map Name ([ ValueType], [ Literal ])
 output1 =
   Map.fromList [
   ]
+
+timer1 :: Map.Map Name Literal
+timer1 = 
+  Map.fromList [
+  ]  
 
