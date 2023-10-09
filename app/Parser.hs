@@ -75,18 +75,18 @@ parserSpec = ParserSpec
                   in  return $ toASTDecls (decl : decls) ),
 		  
       -- | Decl : Decl
-      rule "Decl -> device identifier : identifier ;"  -- device name : capability
+      rule "Decl -> device identifier : OneOrMoreCapabilities ;"  -- device name : capability
         ( \rhs -> let name = getText rhs 2
-	              capability = getText rhs 4
-		  in  return $ toASTDecl ( DeviceDecl name capability )
+                      capabilities = fromASTCapabilities (get rhs 4)
+		  in  return $ toASTDecl ( DeviceDecl name capabilities )
 	),
 
-      rule "Decl -> device identifier : identifier . identifier ;"  -- device name : capability
-        ( \rhs -> let name = getText rhs 2
-	              capability1 = getText rhs 4
-	              capability2 = getText rhs 6
-		  in  return $ toASTDecl ( DeviceDecl name (capability1 ++ "." ++ capability2) )
-	),
+      -- rule "Decl -> device identifier : identifier . identifier ;"  -- device name : capability
+      --   ( \rhs -> let name = getText rhs 2
+      -- 	              capability1 = getText rhs 4
+      -- 	              capability2 = getText rhs 6
+      -- 		  in  return $ toASTDecl ( DeviceDecl name (capability1 ++ "." ++ capability2) )
+      -- 	),
 
       rule "Decl -> timer identifier ;"  -- timer name ;
         ( \rhs -> let name = getText rhs 2
@@ -109,6 +109,31 @@ parserSpec = ParserSpec
         ( \rhs -> let name = getText rhs 2
 	              valuetypes = fromASTValueTypes ( get rhs 5 )
 		  in  return $ toASTDecl ( OutputDecl name valuetypes )
+        ),
+
+      -- | OneOrMoreCapabilities : [ Capability ]
+      
+      rule "OneOrMoreCapabilities -> identifier"
+        ( \rhs -> let capability = getText rhs 1
+                  in  return $ toASTCapabilities [ capability ] ),
+
+      rule "OneOrMoreCapabilities -> identifier . identifier"
+        ( \rhs -> let capability1 = getText rhs 1
+	              capability2 = getText rhs 3
+                  in  return $ toASTCapabilities [ capability1 ++ "." ++ capability2 ] ),
+
+      rule "OneOrMoreCapabilities -> identifier , OneOrMoreCapabilities"
+        ( \rhs -> let capability1 = getText rhs 1
+	              capabilities = fromASTValueTypes (get rhs 3)
+                  in  return $ toASTValueTypes (capability1 : capabilities)
+        ),
+	
+      rule "OneOrMoreCapabilities -> identifier . identifier , OneOrMoreCapabilities"
+        ( \rhs -> let capability1 = getText rhs 1
+                      capability2 = getText rhs 3
+                      capability = capability1 ++ "." ++ capability2
+	              capabilities = fromASTValueTypes (get rhs 5)
+                  in  return $ toASTValueTypes (capability : capabilities)
         ),
 
       -- | OneOrMoreIdentifiers : [ ValueType ]

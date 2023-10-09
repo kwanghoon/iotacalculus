@@ -11,6 +11,7 @@ data AST =
  | ASTDecl { fromASTDecl :: Decl }
  | ASTDecls { fromASTDecls :: [ Decl ] }
  | ASTValueTypes { fromASTValueTypes :: [ ValueType ] }
+ | ASTCapabilities { fromASTCapabilities :: [ Capability ] }
  | ASTEMCA { fromASTEMCA :: [ EMCA ] }
  | ASTEventHandler { fromASTEventHandler :: EventHandler }
  | ASTMultiplePredicateActions { fromASTMultiplePredicateActions :: MultiplePredicateActions }
@@ -28,6 +29,7 @@ toASTRules rules = ASTRules rules
 toASTDecl decl = ASTDecl decl
 toASTDecls decls = ASTDecls decls
 toASTValueTypes valueTypes = ASTValueTypes valueTypes
+toASTCapabilities capabilities = ASTCapabilities capabilities
 toASTEMCA emcas = ASTEMCA emcas
 toASTEventHandler eventhandler = ASTEventHandler eventhandler
 toASTMultiplePredicateActions mpas = ASTMultiplePredicateActions mpas

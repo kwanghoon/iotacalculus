@@ -43,7 +43,7 @@ instance ToJSON Rule where
 type Rules = [ Rule ]
 
 data Decl =
-    DeviceDecl Name Capability
+    DeviceDecl Name [ Capability ]
   | InputDecl Name ValueType
   | OutputDecl Name [ ValueType ]
   | TimerDecl Name
@@ -52,7 +52,7 @@ data Decl =
 instance FromJSON Decl
 
 instance ToJSON Decl where
-  toJSON (DeviceDecl n c) = object [fromString "DeviceDecl" .= (n, c)]
+  toJSON (DeviceDecl n cs) = object [fromString "DeviceDecl" .= (n, cs)]
   toJSON (InputDecl n vt) = object [fromString "InputDecl" .= (n, vt)]
   toJSON (OutputDecl n vts) = object [fromString "OutputDecl" .= (n, vts)]
   toJSON (TimerDecl n) = object [fromString "TimerDecl" .= n]
