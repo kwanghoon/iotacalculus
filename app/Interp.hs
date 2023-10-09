@@ -128,7 +128,7 @@ driverECA eventSet state ruleset =
           if Set.null eventSet' then  -- terminal condition! Note maybeEvent must be Nothing.
               return (eventSet', state')
 	      
-          else driverECA eventSet' state' ruleset
+          else callDriverECA eventSet' state' ruleset
         _ -> let event = Maybe.fromJust maybeEvent in
              do (_, _, _, rulesetIn1, rulesetOut1) <- 
                   driverEventEvalState event eventSet' state' ruleset Set.empty
@@ -139,7 +139,16 @@ driverECA eventSet state ruleset =
                 (_, eventSet'', state'', _) <-
                   driverActEvalState event eventSet' state' rulesetIn2 rulesetOut2
 
-                driverECA eventSet'' state'' ruleset
+                callDriverECA eventSet'' state'' ruleset
+
+callDriverECA :: Set.Set Event -> State -> Ruleset -> IO (Set.Set Event, State)
+callDriverECA eventSet state ruleset =
+  do print "after a cycle of event-condition-action,"
+     print state
+     print eventSet
+     putStrLn ""
+
+     driverECA eventSet state ruleset
 
 ------------------------------------------------------------------------------------------
 -- | (R-E) rule event

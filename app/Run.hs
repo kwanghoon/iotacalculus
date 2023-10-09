@@ -69,29 +69,33 @@ test1 :: IO ()
 test1 = do
   ruleText <- load "./examples/turn-on-hallway-light-when-the-front-door-is-unlocked.iota"
   ruleToJson ruleText
-  rs <- installRule env1 ruleText
-  (event2, iot2) <- driverECA event1 iot1 rs
-  print "iot1:"
-  print iot1
-  print "iot2:"
-  print iot2
+
+  print "Initially,"
+  print initialIot1
+  putStrLn ""
+  
+  rs <- installRule initialEnv1 ruleText
+  (_, iot') <- driverECA initialEvent1 initialIot1 rs
+
+  print "Finally,"
+  print iot'
   return ()
 
-env1 :: Environment
-env1 = 
+initialEnv1 :: Environment
+initialEnv1 = 
   Map.fromList [
     ("front_door", "front_door@myhome"),
     ("hallway_light", "hallway_light@myhome")
   ]
 
-event1 :: Set.Set Event
-event1 =
+initialEvent1 :: Set.Set Event
+initialEvent1 =
   Set.fromList [
     EventField "front_door@myhome" "lock" (ConstantLiteral "locked") (ConstantLiteral "unlocked")
   ]
 
-iot1 :: IoT
-iot1 = (dev1, input1, output1, timer1)
+initialIot1 :: IoT
+initialIot1 = (dev1, input1, output1, timer1)
 
 dev1 :: Map.Map Name (Capability, Map.Map AttributeName Literal)
 dev1 = 
@@ -125,34 +129,36 @@ test2 :: IO ()
 test2 = do
   ruleText <- load "./examples/turn-off-hallway-light-five-minutes-after-the-front-door-is-locked.iota"
   ruleToJson ruleText
-  rs <- installRule env2 ruleText
-  (event2', iot2') <- driverECA event2 iot2 rs
-  print "iot2:"
-  print iot2
-  print "event2:"
-  print event2
-  print "iot2':"
-  print iot2'
-  print "event2':"
-  print event2'
+
+  print "Initially,"
+  print initialIot2
+  print "initial events:"
+  print initialEvent2
+  putStrLn ""
+
+  rs <- installRule initialEnv2 ruleText
+  (_, iot') <- driverECA initialEvent2 initialIot2 rs
+
+  print "Finally,"
+  print iot'
   return ()
 
-env2 :: Environment
-env2 = 
+initialEnv2 :: Environment
+initialEnv2 = 
   Map.fromList [
     ("front_door", "front_door@myhome"),
     ("hallway_light", "hallway_light@myhome"),
     ("light_timer", "hallway_light_timer@myhome")
   ]
 
-event2 :: Set.Set Event
-event2 =
+initialEvent2 :: Set.Set Event
+initialEvent2 =
   Set.fromList [
     EventField "front_door@myhome" "lock" (ConstantLiteral "unlocked") (ConstantLiteral "locked")
   ]
 
-iot2 :: IoT
-iot2 = (dev2, input2, output2, timer2)
+initialIot2 :: IoT
+initialIot2 = (dev2, input2, output2, timer2)
 
 dev2 :: Map.Map Name (Capability, Map.Map AttributeName Literal)
 dev2 = 

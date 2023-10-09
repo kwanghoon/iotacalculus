@@ -58,7 +58,7 @@ executables:
     - -with-rtsopts=-N
     - -static
     dependencies:
-    - iotacalculus
+    - iotacalculus-exe
 
 tests:
   iotacalculus-test:
@@ -70,4 +70,4 @@ tests:
     - -with-rtsopts=-N
     - -static
     dependencies:
-    - iotacalculus
+    - iotacalculus-exe
