@@ -1,4 +1,4 @@
-module Main where
+module Spec where
 
 import Run(_main)
 
@@ -11,9 +11,9 @@ iotaFiles =
         "conflict-example-turn-on-or-turn-off-the-light.iota",
 
         "conflict-example-turn-on-or-turn-off-the-light.iota",
-        "turn-off-hallway-light-five-minutes-after-the-front-door-locks.iota",
+        "turn-off-hallway-light-five-minutes-after-the-front-door-is-locked.iota",
         "turn-off-hallway-light-when-all-family-members-are-outside-the-house-for-more-than-ten-minutes.iota",
-        "turn-on-hallway-light-when-the-front-door-unlocks.iota",
+        "turn-on-hallway-light-when-the-front-door-is-unlocked.iota",
         "turn-on-siren-when-no-one-is-present.iota"
     ]
 
