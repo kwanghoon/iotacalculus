@@ -31,6 +31,9 @@
     ```    
 
  - 실행 결과 (Run.test1)
+
+    * turn-on-hallway-light-when-the-front-door-is-unlocked.iota
+
 ```
 "Initially,"
 (fromList [("front_door@myhome",("lock",fromList [("lock",ConstantLiteral "unlocked")])),("hallway_light@myhome",("switch",fromList [("switch",ConstantLiteral "off")]))],fromList [],fromList [],fromList [])
@@ -51,6 +54,8 @@ fromList []
 ```
 
  - 실행 결과 (Run.test2)
+
+   * turn-off-hallway-light-five-minutes-after-the-front-door-is-locked.iota
 
 ```
 "Initially,"
