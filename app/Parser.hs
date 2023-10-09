@@ -292,7 +292,7 @@ parserSpec = ParserSpec
 	          in  return $ toASTExpression $ MinusSign expr
 	),
       
-      rule "UnaryExpr -> ~ PrimaryExpr"
+      rule "UnaryExpr -> ! PrimaryExpr"
         ( \rhs -> let expr = fromASTExpression $ get rhs 2
 	          in  return $ toASTExpression $ Negate expr
 	),

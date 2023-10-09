@@ -47,7 +47,7 @@ lexerSpec = LexerSpec
 
         ("\\|", mkFn BAR),
 
-        ("~", mkFn NEG),
+        ("!", mkFn NEG),
         ("\\+", mkFn ADDITION),
         ("\\-", mkFn SUBTRACTION),
         ("\\*", mkFn MULTIPLICATION),
