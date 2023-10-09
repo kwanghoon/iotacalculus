@@ -72,6 +72,9 @@ test1 = do
 
   print "Initially,"
   print initialIot1
+
+  print "initial events:"
+  print initialEvent1
   putStrLn ""
   
   rs <- installRule initialEnv1 ruleText
