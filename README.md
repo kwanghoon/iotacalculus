@@ -23,6 +23,7 @@
     ```
      $ stack exec -- ghci
      ghci> :set -iapp
+     ghci> :load Main
      ghci> Run.test1
      ...
      ghci> Run.test2
