@@ -34,7 +34,7 @@
 
     * turn-on-hallway-light-when-the-front-door-is-unlocked.iota
 
-    * [test1.txt](https://github.com/kwanghoon/iotacalculus/blob/master/demo/.txt)
+    * [test1.txt](https://github.com/kwanghoon/iotacalculus/blob/master/demo/test1.txt)
 
  - 실행 결과 (Run.test2)
 
