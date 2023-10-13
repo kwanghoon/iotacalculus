@@ -18,6 +18,10 @@
      $ stack exec -- iotacalculus-exe ./examples/turn-on-siren-when-no-one-is-present.iota 
     ```
 
+ - Examples
+    * examples/*.iota
+    * [more examples](https://github.com/swlabKHCoi/IoTa)
+
 ## iota 프로그램 실행 방법
  - 
     ```
