@@ -1,0 +1,201 @@
+ghci> test1
+parse time:   0.02s
+{
+    "LeafRule": [
+        "\"Turn on the hallway light when the front door unlocks.\"",  
+        [
+            {
+                "DeviceDecl": [
+                    "front_door",
+                    "lock"
+                ]
+            },
+            {
+                "DeviceDecl": [
+                    "hallway_light",
+                    "switch"
+                ]
+            }
+        ],
+        {
+            "EMCA": [
+                {
+                    "EventFrom": [
+                        {
+                            "Field": [
+                                "front_door",
+                                "lock"
+                            ]
+                        },
+                        {
+                            "ConstantLiteral": "locked"
+                        }
+                    ]
+                },
+                [
+                    [
+                        {
+                            "IsEqual": [
+                                {
+                                    "ExpressionPredicate": {
+                                        "Field": [
+                                            "front_door",
+                                            "lock"
+                                        ]
+                                    }
+                                },
+                                {
+                                    "ExpressionPredicate": {
+                                        "IdentifierExpression": "unlocked"
+                                    }
+                                }
+                            ]
+                        },
+                        [
+                            {
+                                "CommandAction": [
+                                    {
+                                        "Field": [
+                                            "hallway_light",
+                                            "switch"
+                                        ]
+                                    },
+                                    {
+                                        "IdentifierExpression": "on"   
+                                    }
+                                ]
+                            }
+                        ]
+                    ]
+                ]
+            ]
+        }
+    ]
+}
+@Initially:
+[
+    {
+        "front_door@myhome": [
+            "lock",
+            {
+                "lock": {
+                    "ConstantLiteral": "unlocked"
+                }
+            }
+        ],
+        "hallway_light@myhome": [
+            "switch",
+            {
+                "switch": {
+                    "ConstantLiteral": "off"
+                }
+            }
+        ]
+    },
+    {},
+    {},
+    {}
+]
+
+@initial events:
+{
+    "EventField": [
+        "front_door@myhome",
+        "lock",
+        {
+            "ConstantLiteral": "locked"
+        },
+        {
+            "ConstantLiteral": "unlocked"
+        }
+    ]
+}
+
+@After event-condition-action:
+[
+    {
+        "front_door@myhome": [
+            "lock",
+            {
+                "lock": {
+                    "ConstantLiteral": "unlocked"
+                }
+            }
+        ],
+        "hallway_light@myhome": [
+            "switch",
+            {
+                "switch": {
+                    "ConstantLiteral": "on"
+                }
+            }
+        ]
+    },
+    {},
+    {},
+    {}
+]
+
+{
+    "EventField": [
+        "hallway_light",
+        "switch",
+        {
+            "ConstantLiteral": "off"
+        },
+        {
+            "ConstantLiteral": "on"
+        }
+    ]
+}
+
+@After event-condition-action:
+[
+    {
+        "front_door@myhome": [
+            "lock",
+            {
+                "lock": {
+                    "ConstantLiteral": "unlocked"
+                }
+            }
+        ],
+        "hallway_light@myhome": [
+            "switch",
+            {
+                "switch": {
+                    "ConstantLiteral": "on"
+                }
+            }
+        ]
+    },
+    {},
+    {},
+    {}
+]
+
+
+@Finally:
+[
+    {
+        "front_door@myhome": [
+            "lock",
+            {
+                "lock": {
+                    "ConstantLiteral": "unlocked"
+                }
+            }
+        ],
+        "hallway_light@myhome": [
+            "switch",
+            {
+                "switch": {
+                    "ConstantLiteral": "on"
+                }
+            }
+        ]
+    },
+    {},
+    {},
+    {}
+]

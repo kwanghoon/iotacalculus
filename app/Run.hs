@@ -70,18 +70,19 @@ test1 = do
   ruleText <- load "./examples/turn-on-hallway-light-when-the-front-door-is-unlocked.iota"
   ruleToJson ruleText
 
-  print "Initially,"
-  print initialIot1
+  putStrLn "@Initially:"
+  stateToJson initialIot1
+  putStrLn ""
 
-  print "initial events:"
-  print initialEvent1
+  putStrLn "@initial events:"
+  mapM_ eventToJson $ Set.toList initialEvent1
   putStrLn ""
   
   rs <- installRule initialEnv1 ruleText
   (_, iot') <- driverECA initialEvent1 initialIot1 rs
 
-  print "Finally,"
-  print iot'
+  putStrLn "@Finally:"
+  stateToJson iot'
   return ()
 
 initialEnv1 :: Environment
@@ -133,17 +134,19 @@ test2 = do
   ruleText <- load "./examples/turn-off-hallway-light-five-minutes-after-the-front-door-is-locked.iota"
   ruleToJson ruleText
 
-  print "Initially,"
-  print initialIot2
-  print "initial events:"
-  print initialEvent2
+  putStrLn "@Initially:"
+  stateToJson initialIot2
+  putStrLn ""
+
+  putStrLn "@Initial events:"
+  mapM_ eventToJson $ Set.toList  initialEvent2
   putStrLn ""
 
   rs <- installRule initialEnv2 ruleText
   (_, iot') <- driverECA initialEvent2 initialIot2 rs
 
-  print "Finally,"
-  print iot'
+  putStrLn "@Finally:"
+  stateToJson iot'
   return ()
 
 initialEnv2 :: Environment

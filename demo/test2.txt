@@ -1,0 +1,510 @@
+ghci> test2
+parse time:   0.05s
+{
+    "NodeRule": [
+        "\"Turn off the hallway light five minutes after the door locks\"",
+        [
+            {
+                "DeviceDecl": [
+                    "front_door",
+                    "lock"
+                ]
+            },
+            {
+                "DeviceDecl": [
+                    "hallway_light",
+                    "switch"
+                ]
+            },
+            {
+                "TimerDecl": "light_timer"
+            }
+        ],
+        [
+            {
+                "LeafRule": [
+                    "\"start a timer when the door gets locked.\"",    
+                    [],
+                    {
+                        "EMCA": [
+                            {
+                                "EventFrom": [
+                                    {
+                                        "Field": [
+                                            "front_door",
+                                            "lock"
+                                        ]
+                                    },
+                                    {
+                                        "ConstantLiteral": "unlocked"  
+                                    }
+                                ]
+                            },
+                            [
+                                [
+                                    {
+                                        "IsEqual": [
+                                            {
+                                                "ExpressionPredicate": 
+{
+                                                    "Field": [
+                                                        "front_door",  
+                                                        "lock"
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "ExpressionPredicate": 
+{
+                                                    "IdentifierExpression": "locked"
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    [
+                                        {
+                                            "StartTimer": [
+                                                "light_timer",
+                                                {
+                                                    "LiteralExpression": {
+                                                        "NumberLiteral": 0
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                ]
+                            ]
+                        ]
+                    }
+                ]
+            },
+            {
+                "LeafRule": [
+                    "\"increment the timer.\"",
+                    [],
+                    {
+                        "EMCA": [
+                            {
+                                "JustEvent": {
+                                    "Timer": "light_timer"
+                                }
+                            },
+                            [
+                                [
+                                    {
+                                        "LessThan": [
+                                            {
+                                                "ExpressionPredicate": 
+{
+                                                    "IdentifierExpression": "light_timer"
+                                                }
+                                            },
+                                            {
+                                                "LiteralExpression": { 
+                                                    "NumberLiteral": 5 
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    [
+                                        {
+                                            "TickTimer": "light_timer" 
+                                        }
+                                    ]
+                                ]
+                            ]
+                        ]
+                    }
+                ]
+            },
+            {
+                "LeafRule": [
+                    "\"turn off the the hallway light and stop the timer when the timer reaches five minutes.\"",
+                    [],
+                    {
+                        "EMCA": [
+                            {
+                                "JustEvent": {
+                                    "Timer": "light_timer"
+                                }
+                            },
+                            [
+                                [
+                                    {
+                                        "IsEqual": [
+                                            {
+                                                "ExpressionPredicate": 
+{
+                                                    "IdentifierExpression": "light_timer"
+                                                }
+                                            },
+                                            {
+                                                "ExpressionPredicate": 
+{
+                                                    "LiteralExpression": {
+                                                        "NumberLiteral": 5
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    [
+                                        {
+                                            "CommandAction": [
+                                                {
+                                                    "Field": [
+                                                        "hallway_light",
+                                                        "switch"       
+                                                    ]
+                                                },
+                                                {
+                                                    "IdentifierExpression": "off"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "StopTimer": "light_timer" 
+                                        }
+                                    ]
+                                ]
+                            ]
+                        ]
+                    }
+                ]
+            }
+        ]
+    ]
+}
+@Initially:
+[
+    {
+        "front_door@myhome": [
+            "lock",
+            {
+                "lock": {
+                    "ConstantLiteral": "locked"
+                }
+            }
+        ],
+        "hallway_light@myhome": [
+            "switch",
+            {
+                "switch": {
+                    "ConstantLiteral": "on"
+                }
+            }
+        ]
+    },
+    {},
+    {},
+    {}
+]
+
+@Initial events:
+{
+    "EventField": [
+        "front_door@myhome",
+        "lock",
+        {
+            "ConstantLiteral": "unlocked"
+        },
+        {
+            "ConstantLiteral": "locked"
+        }
+    ]
+}
+
+@After event-condition-action:
+[
+    {
+        "front_door@myhome": [
+            "lock",
+            {
+                "lock": {
+                    "ConstantLiteral": "locked"
+                }
+            }
+        ],
+        "hallway_light@myhome": [
+            "switch",
+            {
+                "switch": {
+                    "ConstantLiteral": "on"
+                }
+            }
+        ]
+    },
+    {},
+    {},
+    {
+        "hallway_light_timer@myhome": {
+            "NumberLiteral": 1
+        }
+    }
+]
+
+{
+    "EventTimer": [
+        "hallway_light_timer@myhome",
+        {
+            "NumberLiteral": 0
+        },
+        {
+            "NumberLiteral": 1
+        }
+    ]
+}
+
+@After event-condition-action:
+[
+    {
+        "front_door@myhome": [
+            "lock",
+            {
+                "lock": {
+                    "ConstantLiteral": "locked"
+                }
+            }
+        ],
+        "hallway_light@myhome": [
+            "switch",
+            {
+                "switch": {
+                    "ConstantLiteral": "on"
+                }
+            }
+        ]
+    },
+    {},
+    {},
+    {
+        "hallway_light_timer@myhome": {
+            "NumberLiteral": 2
+        }
+    }
+]
+
+{
+    "EventTimer": [
+        "hallway_light_timer@myhome",
+        {
+            "NumberLiteral": 1
+        },
+        {
+            "NumberLiteral": 2
+        }
+    ]
+}
+
+@After event-condition-action:
+[
+    {
+        "front_door@myhome": [
+            "lock",
+            {
+                "lock": {
+                    "ConstantLiteral": "locked"
+                }
+            }
+        ],
+        "hallway_light@myhome": [
+            "switch",
+            {
+                "switch": {
+                    "ConstantLiteral": "on"
+                }
+            }
+        ]
+    },
+    {},
+    {},
+    {
+        "hallway_light_timer@myhome": {
+            "NumberLiteral": 3
+        }
+    }
+]
+
+{
+    "EventTimer": [
+        "hallway_light_timer@myhome",
+        {
+            "NumberLiteral": 2
+        },
+        {
+            "NumberLiteral": 3
+        }
+    ]
+}
+
+@After event-condition-action:
+[
+    {
+        "front_door@myhome": [
+            "lock",
+            {
+                "lock": {
+                    "ConstantLiteral": "locked"
+                }
+            }
+        ],
+        "hallway_light@myhome": [
+            "switch",
+            {
+                "switch": {
+                    "ConstantLiteral": "on"
+                }
+            }
+        ]
+    },
+    {},
+    {},
+    {
+        "hallway_light_timer@myhome": {
+            "NumberLiteral": 4
+        }
+    }
+]
+
+{
+    "EventTimer": [
+        "hallway_light_timer@myhome",
+        {
+            "NumberLiteral": 3
+        },
+        {
+            "NumberLiteral": 4
+        }
+    ]
+}
+
+@After event-condition-action:
+[
+    {
+        "front_door@myhome": [
+            "lock",
+            {
+                "lock": {
+                    "ConstantLiteral": "locked"
+                }
+            }
+        ],
+        "hallway_light@myhome": [
+            "switch",
+            {
+                "switch": {
+                    "ConstantLiteral": "on"
+                }
+            }
+        ]
+    },
+    {},
+    {},
+    {
+        "hallway_light_timer@myhome": {
+            "NumberLiteral": 5
+        }
+    }
+]
+
+{
+    "EventTimer": [
+        "hallway_light_timer@myhome",
+        {
+            "NumberLiteral": 4
+        },
+        {
+            "NumberLiteral": 5
+        }
+    ]
+}
+
+@After event-condition-action:
+[
+    {
+        "front_door@myhome": [
+            "lock",
+            {
+                "lock": {
+                    "ConstantLiteral": "locked"
+                }
+            }
+        ],
+        "hallway_light@myhome": [
+            "switch",
+            {
+                "switch": {
+                    "ConstantLiteral": "off"
+                }
+            }
+        ]
+    },
+    {},
+    {},
+    {}
+]
+
+{
+    "EventField": [
+        "hallway_light",
+        "switch",
+        {
+            "ConstantLiteral": "on"
+        },
+        {
+            "ConstantLiteral": "off"
+        }
+    ]
+}
+
+@After event-condition-action:
+[
+    {
+        "front_door@myhome": [
+            "lock",
+            {
+                "lock": {
+                    "ConstantLiteral": "locked"
+                }
+            }
+        ],
+        "hallway_light@myhome": [
+            "switch",
+            {
+                "switch": {
+                    "ConstantLiteral": "off"
+                }
+            }
+        ]
+    },
+    {},
+    {},
+    {}
+]
+
+
+@Finally:
+[
+    {
+        "front_door@myhome": [
+            "lock",
+            {
+                "lock": {
+                    "ConstantLiteral": "locked"
+                }
+            }
+        ],
+        "hallway_light@myhome": [
+            "switch",
+            {
+                "switch": {
+                    "ConstantLiteral": "off"
+                }
+            }
+        ]
+    },
+    {},
+    {},
+    {}
+]

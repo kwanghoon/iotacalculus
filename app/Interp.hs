@@ -1,17 +1,41 @@
+{-# LANGUAGE DeriveGeneric #-}
+
 module Interp where
 
 import qualified Data.Set   as Set
 import qualified Data.Map   as Map
 import qualified Data.Maybe as Maybe
 
+import Data.Aeson
+import Data.Aeson.Key (fromString)
+import Data.Aeson.Encode.Pretty (encodePretty)
+
+import GHC.Generics ( Generic )
+
 import Control.Monad (foldM)
+
+------------------------------------------------------------------------
+-- | Pretty printing JSON
+------------------------------------------------------------------------
+
+import qualified Data.ByteString.Lazy.Char8 as B
+
+------------------------------------------------------------------------
 
 import Expr
 
 data Event =
     EventField DeviceName AttributeName EventConstant EventConstant
   | EventTimer TimerName EventConstant EventConstant
-  deriving (Eq, Ord, Show)
+  deriving (Eq, Ord, Show, Generic)
+
+instance FromJSON Event
+
+instance ToJSON Event where
+  toJSON (EventField dev attr litFrom litTo) = 
+    object [fromString "EventField" .= (dev, attr, litFrom, litTo)]
+  toJSON (EventTimer timer litFrom litTo) = 
+    object [fromString "EventTimer" .= (timer, litFrom, litTo)]
 
 type State = IoT -- Map.Map DeviceName (Map.Map Expr.AttributeName Expr.Literal)
 
@@ -37,6 +61,13 @@ data EvalState =
  | EventEvalState Ruleset Ruleset  -- (In, Out)
  | PredEvalState  Ruleset Ruleset  -- (In, Out)
  | ActEvalState   Ruleset Ruleset  -- (In, Out)
+
+stateToJson :: State -> IO ()
+stateToJson state = B.putStrLn $ encodePretty state
+
+eventToJson :: Event -> IO ()
+eventToJson event = B.putStrLn $ encodePretty event
+
 
  ------------------------------------------------------------------------------------------
  -- | Internet of things
@@ -143,9 +174,10 @@ driverECA eventSet state ruleset =
 
 callDriverECA :: Set.Set Event -> State -> Ruleset -> IO (Set.Set Event, State)
 callDriverECA eventSet state ruleset =
-  do print "after a cycle of event-condition-action,"
-     print state
-     print eventSet
+  do putStrLn "@After event-condition-action:"
+     stateToJson state
+     putStrLn ""
+     mapM_ eventToJson $ Set.toList eventSet
      putStrLn ""
 
      driverECA eventSet state ruleset
