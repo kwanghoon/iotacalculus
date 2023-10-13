@@ -34,13 +34,13 @@
 
     * turn-on-hallway-light-when-the-front-door-is-unlocked.iota
 
-    * [test1.txt](https://github.com/kwanghoon/iotacalculus/blob/master/test/test1.txt)
+    * [test1.txt](https://github.com/kwanghoon/iotacalculus/blob/master/demo/test1.txt)
 
  - 실행 결과 (Run.test2)
 
    * turn-off-hallway-light-five-minutes-after-the-front-door-is-locked.iota
 
-   * [test2.txt](https://github.com/kwanghoon/iotacalculus/blob/master/test/test2.txt)
+   * [test2.txt](https://github.com/kwanghoon/iotacalculus/blob/master/demo/test2.txt)
 
 ## The grammar of Iota calculus
 
