@@ -128,47 +128,15 @@ Predicate -> exists Group ( identifier -> Predicate )
 
 Predicate -> Expression
 
-Expression -> Expression == Expression
+Expression -> Expression [ == | != | < | <= | > | >= | + | - | * | / ] Expression
 
-Expression -> Expression != Expression
+Expression -> [ - | ! ] Expression
 
-Expression -> Expression < Expression
-
-Expression -> Expression <= Expression
-
-Expression -> Expression > Expression
-
-Expression -> Expression >= Expression
-
-Expression -> Expression + Expression
-
-Expression -> Expression - Expression
-
-Expression -> Expression * Expression
-
-Expression -> Expression / Expression
-
-Expression -> - Expression
-
-Expression -> ! Expression
-
-Expression -> true
-
-Expression -> false
-
-Expression -> number_literal
-
-Expression -> string_literal
-
-Expression -> identifier
-
-Expression -> identifier . identifier
+Expression -> <b>true</b> | <b>false</b> | number_literal | string_literal | identifier | identifier . identifier
 
 Expression -> ( Expression )
 
-Constant -> identifier
-
-Constant -> number_literal
+Constant -> identifier | number_literal
 
 
 Action -> FieldOrTimer := Expression
