@@ -19,7 +19,7 @@
     ```
 
  - Examples
-    * examples/*.iota
+    * [examples/*.iota](https://github.com/kwanghoon/iotacalculus/tree/main/examples)
     * [more examples](https://github.com/swlabKHCoi/IoTa)
 
 ## iota 프로그램 실행 방법
@@ -38,13 +38,13 @@
 
     * turn-on-hallway-light-when-the-front-door-is-unlocked.iota
 
-    * [test1.txt](https://github.com/kwanghoon/iotacalculus/blob/main/demo/test1.txt)
+    * [test1.txt](https://github.com/kwanghoon/iotacalculus/tree/main/demo/test1.txt)
 
  - 실행 결과 (Run.test2)
 
    * turn-off-hallway-light-five-minutes-after-the-front-door-is-locked.iota
 
-   * [test2.txt](https://github.com/kwanghoon/iotacalculus/blob/main/demo/test2.txt)
+   * [test2.txt](https://github.com/kwanghoon/iotacalculus/tree/main/demo/test2.txt)
 
 ## The grammar of Iota calculus
 
