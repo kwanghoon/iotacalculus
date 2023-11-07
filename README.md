@@ -69,68 +69,66 @@ Rule -> <b>rule</b> string_literal
              ..., 
              Deckn, 
              
-             EventHandler ; 
+             EventHandler <b>;</b> 
              
              MultiplePredicateActions 
         <b>end</b>
 
         (where n>=0)
 
-Decl -> <b>device</b> identifier : 
-          (identifier1 | identifier.identifier1) , 
-          ... , 
-          (identifierk | identifier.identifierk) ;
+Decl -> <b>device</b> identifier <b>:</b> 
+          (identifier1 | identifier.identifier1) <b>,</b> 
+          ... <b>,</b> 
+          (identifierk | identifier.identifierk) <b>;</b>
 
         (where k>=1)
 
-Decl -> <b>timer</b> identifier ;
+Decl -> <b>timer</b> identifier <b>;</b>
 
-Decl -> <b>input</b> identifier : identifier ;
+Decl -> <b>input</b> identifier <b>:</b> identifier <b>;</b>
 
-Decl -> <b>output</b> identifier : identifier ;
+Decl -> <b>output</b> identifier <b>:</b> identifier <b>;</b>
 
-Decl -> <b>output</b> identifier : ( identifier1, ..., identifierk ) ;
+Decl -> <b>output</b> identifier <b>:</b> <b>(</b> identifier1 <b>,</b> ... <b>,</b> identifierk <b>)</b> <b>;</b>
 
         (where k>=1)
 
-EventHandler -> FieldOrTimer [ . ~> ]
+EventHandler -> FieldOrTimer <b>[</b> <b>.</b> <b>~></b> <b>]</b>
 
-EventHandler -> FieldOrTimer [ . ~> Constant ]
+EventHandler -> FieldOrTimer <b>[</b> <b>.</b> <b>~></b> Constant <b>]</b>
 
-EventHandler -> FieldOrTimer [ Constant ~> ]
+EventHandler -> FieldOrTimer <b>[</b> Constant <b>~></b> <b>]</b>
 
-EventHandler -> FieldOrTimer [ Constant ~> Constant ]
+EventHandler -> FieldOrTimer <b>[</b> Constant <b>~></b> Constant <b>]</b>
 
-EventHandler -> <b>any</b> Group ( identifier -> EventHandler )
+EventHandler -> <b>any</b> Group <b>(</b> identifier <b>-></b> EventHandler <b>)</b>
 
 MultiplePredicateActions -> 
-       Predicate;
-       Action1,
+       Predicate <b>;</b>
+       Action1 <b>,</b>
        ...
        Actionj1
 
-    | ...
+    <b>|</b> ...
 
-       Predicatek;
-       Action1,
+       Predicatek <b>;</b>
+       Action1 <b>,</b>
        ...
        Actionjk
 
    (where k>=1, j1>=1, ..., jk>=1)
 
-Predicate -> Predicate || Predicate
+Predicate -> Predicate [ <b>||</b> | <b>&&</b> ] Predicate
 
-Predicate -> Predicate && Predicate
+Predicate -> all Group ( identifier <b>-></b> Predicate )
 
-Predicate -> all Group ( identifier -> Predicate )
-
-Predicate -> exists Group ( identifier -> Predicate )
+Predicate -> exists Group ( identifier <b>-></b> Predicate )
 
 Predicate -> Expression
 
-Expression -> Expression [ == | != | < | <= | > | >= | + | - | * | / ] Expression
+Expression -> Expression [ <b>==</b> | <b>!=</b> | <b><</b> | <b><=</b> | <b>></b> | <b>>=</b> | <b>+</b> | <b>-</b> | <b>*</b> | <b>/</b> ] Expression
 
-Expression -> [ - | ! ] Expression
+Expression -> [ <b>-</b> | <b>!</b> ] Expression
 
 Expression -> <b>true</b> | <b>false</b> | number_literal | string_literal | identifier | identifier . identifier
 
@@ -139,25 +137,25 @@ Expression -> ( Expression )
 Constant -> identifier | number_literal
 
 
-Action -> FieldOrTimer := Expression
+Action -> FieldOrTimer <b>:=</b> Expression
 
-Action -> identifier ( Expression1, ..., Expressionk )
+Action -> identifier <b>(</b> Expression1 <b>,</b> ... <b>,</b> Expressionk <b>)</b>
 
    (where k>=1)
 
-Action -> <b>start</b> identifier at Expression
+Action -> <b>start</b> identifier <b>at</b> Expression
 
 Action -> <b>stop</b> identifier
 
-Action -> <b>map</b> Group ( identifier -> Action )
+Action -> <b>map</b> Group <b>(</b> identifier <b>-></b> Action <b>)</b>
 
 FieldOrTimer -> identifier
 
-FieldOrTimer -> identifier . identifier
+FieldOrTimer -> identifier <b>.</b> identifier
 
 Group -> identifier
 
-Group -> { identifier1, ..., identifiern }
+Group -> <b>{</b> identifier1 <b>,</b> ... <b>,</b> identifiern <b>}</b>
 
     (where n>=1)
 </pre>
