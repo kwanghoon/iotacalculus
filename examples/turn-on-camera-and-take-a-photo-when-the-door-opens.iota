@@ -1,0 +1,49 @@
+// https://github.com/cosmos-1885/starter-kit-smartapp-nodejs/blob/main/smartapp.js
+
+// https://developer.smartthings.com/docs/devices/capabilities/capabilities-reference
+//   - contactSensor
+//   - motionSensor
+//   - button
+
+// handleContactSensor
+// handleMotionSensor
+// handleButton
+// handleCameraImageCapture
+// handleCameraSwitch
+
+rules "turn on camera and take a photo when the door opens"
+  device myContactSensor : contactSensor ;
+  device myMotionSensor : motionSensor;
+  device myButton : button;
+  device myCamera : imageCapture, image, switch;
+
+  // handleContactSensor
+  rule "turn on camera when contactSensor is on, turn off otherwise"
+    myContactSensor.switch [off ~>];
+    myContactSensor.switch == on;
+    myCamera.switch := on
+  end
+
+  rule "turn on camera when contactSensor is on, turn off otherwise"
+    myContactSensor.switch [on ~>];
+    myContactSensor.switch == off;
+    myCamera.switch := off
+  end
+
+  // handleCameraSwitch
+  rule "Take a photo when myCamera is turned on"
+     myCamera.switch[off ~>];
+     myCamera.switch == on;
+     myCamera.take := "{1, 2}"
+  end
+
+  // handleCameraImageCapture
+  rule "Fetch the image when it was taken"
+     output fetch : (String, String);
+
+     myCamera.image[.~>];
+     true;
+     fetch("GET", myCamera.image)
+  end
+
+end

@@ -124,8 +124,8 @@ parserSpec = ParserSpec
 
       rule "OneOrMoreCapabilities -> identifier , OneOrMoreCapabilities"
         ( \rhs -> let capability1 = getText rhs 1
-	              capabilities = fromASTValueTypes (get rhs 3)
-                  in  return $ toASTValueTypes (capability1 : capabilities)
+	              capabilities = fromASTCapabilities (get rhs 3)
+                  in  return $ toASTCapabilities (capability1 : capabilities)
         ),
 	
       rule "OneOrMoreCapabilities -> identifier . identifier , OneOrMoreCapabilities"
